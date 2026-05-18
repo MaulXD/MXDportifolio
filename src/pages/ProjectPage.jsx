@@ -9,8 +9,7 @@ import {
   Image as ImageIcon,
   Radio,
   Globe,
-  Layers,
-  HelpCircle,
+  Layout,
   Loader2,
 } from 'lucide-react'
 import Navbar from '../components/Navbar'
@@ -36,8 +35,7 @@ const CATEGORY_ICONS = {
   Image: ImageIcon,
   Radio,
   Globe,
-  Layers,
-  HelpCircle,
+  Layout,
 }
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -93,7 +91,7 @@ export default function ProjectPage() {
     }
   }, [routeKey])
 
-  const meta = project ? getCategoryMeta(project.category) : getCategoryMeta('Motion Design')
+  const meta = project ? getCategoryMeta(project.category) : getCategoryMeta('Motions')
   const styles = accentMap[meta.accent] ?? accentMap['neon-violet']
   const Icon = CATEGORY_ICONS[meta.iconName] ?? Clapperboard
   const { valid, label } = getGallerySummary(project?.galeria)

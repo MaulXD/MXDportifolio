@@ -318,8 +318,8 @@ export default function BudgetForm() {
           Solicite um <span className="text-neon">orçamento</span>
         </h2>
         <p className="mt-4 text-white/50">
-          Preencha o formulário. Ao enviar, abrimos o WhatsApp com sua mensagem pronta — padrão
-          usado por estúdios e freelancers para briefings rápidos.
+          Preencha seus dados, escolha o que você precisa e clique em enviar. Vamos abrir o WhatsApp
+          com sua mensagem pronta — é só conferir e mandar.
         </p>
 
         <motion.form

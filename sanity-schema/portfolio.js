@@ -46,7 +46,7 @@ export default {  name: 'portfolio',
       title: 'Tipo de projeto',
       type: 'string',
       description:
-        'Mesmas categorias do formulário de orçamento (Motion, Stream pack, Site, etc.).',
+        'Categoria do projeto: Motions, Streampacks, Sites, Ilustrações, Logotipos ou Banners e Folders.',
       options: {
         list: PORTFOLIO_CATEGORY_OPTIONS,
         layout: 'dropdown',

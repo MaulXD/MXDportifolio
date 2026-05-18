@@ -8,8 +8,7 @@ import {
   Image as ImageIcon,
   Radio,
   Globe,
-  Layers,
-  HelpCircle,
+  Layout,
   Loader2,
 } from 'lucide-react'
 import GalleryMedia from './GalleryMedia'
@@ -29,8 +28,7 @@ const CATEGORY_ICONS = {
   Image: ImageIcon,
   Radio,
   Globe,
-  Layers,
-  HelpCircle,
+  Layout,
 }
 
 export default function Portfolio() {

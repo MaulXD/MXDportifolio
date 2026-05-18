@@ -1,9 +1,11 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { Mail, MessageCircle, Phone, Globe, Send } from 'lucide-react'
+import { Mail, Phone, Send } from 'lucide-react'
+import WhatsAppIcon from './icons/WhatsAppIcon'
 
 const CHANNELS = [
   {
+    id: 'email-main',
     icon: Mail,
     label: 'E-mail principal',
     value: 'contato@raulxd.eu',
@@ -12,6 +14,7 @@ const CHANNELS = [
     iconColor: 'text-neon-green',
   },
   {
+    id: 'email-alt',
     icon: Mail,
     label: 'E-mail alternativo',
     value: 'raulmacaluz@live.com',
@@ -20,14 +23,16 @@ const CHANNELS = [
     iconColor: 'text-neon-cyan',
   },
   {
-    icon: MessageCircle,
+    id: 'whatsapp',
+    isWhatsApp: true,
     label: 'WhatsApp',
     value: '(82) 99355-4322',
     href: 'https://wa.me/5582993554322',
-    glow: 'group-hover:shadow-[0_0_16px_rgba(0,255,157,0.4)]',
-    iconColor: 'text-neon-green',
+    glow: 'group-hover:shadow-[0_0_16px_rgba(37,211,102,0.45)]',
+    iconColor: 'text-[#25D366]',
   },
   {
+    id: 'phone',
     icon: Phone,
     label: 'Telefone',
     value: '(82) 99355-4322',
@@ -35,19 +40,6 @@ const CHANNELS = [
     glow: 'group-hover:shadow-[0_0_16px_rgba(245,158,11,0.4)]',
     iconColor: 'text-neon-amber',
   },
-  {
-    icon: Globe,
-    label: 'Site',
-    value: 'raulxd.eu',
-    href: 'https://www.raulxd.eu',
-    glow: 'group-hover:shadow-[0_0_16px_rgba(139,92,246,0.4)]',
-    iconColor: 'text-neon-violet',
-  },
-]
-
-const LANGUAGES = [
-  { lang: 'Português', level: 'Nativo' },
-  { lang: 'Inglês', level: 'Avançado' },
 ]
 
 export default function Contact() {
@@ -56,7 +48,7 @@ export default function Contact() {
 
   return (
     <section id="contact" className="relative py-24 sm:py-32">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-neon-green/[0.03] to-transparent" />
+      <motion.div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-neon-green/[0.03] to-transparent" />
 
       <motion.div
         ref={ref}
@@ -74,31 +66,38 @@ export default function Contact() {
         </p>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {CHANNELS.map((channel, i) => (
-            <motion.a
-              key={channel.label}
-              href={channel.href}
-              target={channel.href.startsWith('http') ? '_blank' : undefined}
-              rel={channel.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: 0.15 + i * 0.08 }}
-              whileHover={{ y: -4 }}
-              className="glass-hover group flex items-start gap-4 rounded-2xl p-5"
-            >
-              <div
-                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-bg-700/80 transition-shadow ${channel.glow}`}
+          {CHANNELS.map((channel, i) => {
+            const Icon = channel.icon
+            return (
+              <motion.a
+                key={channel.id}
+                href={channel.href}
+                target={channel.href?.startsWith('http') ? '_blank' : undefined}
+                rel={channel.href?.startsWith('http') ? 'noopener noreferrer' : undefined}
+                initial={{ opacity: 0, y: 20 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ delay: 0.15 + i * 0.08 }}
+                whileHover={{ y: -4 }}
+                className="glass-hover group flex items-start gap-4 rounded-2xl p-5"
               >
-                <channel.icon size={20} className={channel.iconColor} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs text-white/40">{channel.label}</p>
-                <p className="mt-0.5 truncate text-sm font-medium text-white group-hover:text-neon-green transition-colors">
-                  {channel.value}
-                </p>
-              </div>
-            </motion.a>
-          ))}
+                <div
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-bg-700/80 transition-shadow ${channel.glow}`}
+                >
+                  {channel.isWhatsApp ? (
+                    <WhatsAppIcon size={22} className={channel.iconColor} />
+                  ) : (
+                    Icon && <Icon size={20} className={channel.iconColor} />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-white/40">{channel.label}</p>
+                  <p className="mt-0.5 truncate text-sm font-medium text-white transition-colors group-hover:text-neon-green">
+                    {channel.value}
+                  </p>
+                </div>
+              </motion.a>
+            )
+          })}
         </div>
 
         <motion.div
@@ -115,7 +114,7 @@ export default function Contact() {
             whileTap={{ scale: 0.97 }}
             className="flex items-center gap-2 rounded-xl bg-neon-green px-6 py-3.5 text-sm font-semibold text-bg-950"
           >
-            <MessageCircle size={18} />
+            <WhatsAppIcon size={18} className="text-bg-950" />
             WhatsApp
           </motion.a>
           <motion.a
@@ -128,42 +127,14 @@ export default function Contact() {
             Enviar E-mail
           </motion.a>
         </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.65 }}
-          className="mt-10 flex flex-wrap gap-3"
-        >
-          {LANGUAGES.map((l) => (
-            <span
-              key={l.lang}
-              className="rounded-full border border-white/10 bg-bg-800/60 px-4 py-2 text-sm text-white/60"
-            >
-              <span className="font-medium text-white">{l.lang}</span>
-              <span className="mx-2 text-white/20">·</span>
-              {l.level}
-            </span>
-          ))}
-        </motion.div>
       </motion.div>
 
       <footer className="mt-20 border-t border-white/5 py-8">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <img src="/favicon-mxd.png" alt="Raul Luz" className="h-8 w-8 rounded-full object-cover opacity-90" />
-            <p className="text-sm text-white/40">
-              © 2026 Raul Luz — Designer Gráfico & Motion Designer
-            </p>
-          </div>
-          <a
-            href="https://www.raulxd.eu"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-neon-green/70 transition-colors hover:text-neon-green"
-          >
-            raulxd.eu
-          </a>
+        <div className="mx-auto flex max-w-6xl items-center justify-center gap-3 px-4 sm:px-6 lg:px-8">
+          <img src="/favicon-mxd.png" alt="Raul Luz" className="h-8 w-8 rounded-full object-cover opacity-90" />
+          <p className="text-sm text-white/40">
+            © 2026 Raul Luz — Designer Gráfico & Motion Designer
+          </p>
         </div>
       </footer>
     </section>

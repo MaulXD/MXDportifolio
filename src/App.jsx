@@ -4,6 +4,7 @@ import About from './components/About'
 import Skills from './components/Skills'
 import Experience from './components/Experience'
 import Portfolio from './components/Portfolio'
+import BudgetForm from './components/BudgetForm'
 import Contact from './components/Contact'
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
         <Skills />
         <Experience />
         <Portfolio />
+        <BudgetForm />
         <Contact />
       </main>
     </div>

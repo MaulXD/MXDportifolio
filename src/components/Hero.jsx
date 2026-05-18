@@ -29,7 +29,7 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative flex min-h-screen items-center justify-center overflow-hidden pt-24"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden pt-20"
     >
       <motion.div
         className="bg-grid pointer-events-none absolute inset-0 opacity-60"
@@ -55,18 +55,18 @@ export default function Hero() {
         />
       ))}
 
-      <div className="relative z-10 mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
         <motion.div variants={CONTAINER} initial="hidden" animate="show" className="text-center">
-          <motion.div variants={ITEM} className="mb-8 flex justify-center">
+          <motion.div variants={ITEM} className="mb-6 flex justify-center">
             {!logoError ? (
               <img
                 src="/mxd-logo.png"
                 alt="Logo Raul Luz"
-                className="h-28 w-28 rounded-full object-cover drop-shadow-[0_0_24px_rgba(0,255,157,0.35)] sm:h-32 sm:w-32"
+                className="h-36 w-36 rounded-full object-cover drop-shadow-[0_0_28px_rgba(0,255,157,0.4)] sm:h-44 sm:w-44"
                 onError={() => setLogoError(true)}
               />
             ) : (
-              <div className="flex h-24 w-24 items-center justify-center rounded-3xl border border-neon-green/30 bg-bg-800 font-display text-3xl font-bold text-neon-green sm:h-28 sm:w-28">
+              <div className="flex h-36 w-36 items-center justify-center rounded-3xl border border-neon-green/30 bg-bg-800 font-display text-4xl font-bold text-neon-green sm:h-44 sm:w-44">
                 RL
               </div>
             )}
@@ -94,13 +94,13 @@ export default function Hero() {
 
           <motion.p
             variants={ITEM}
-            className="mx-auto mt-6 max-w-xl text-sm leading-relaxed text-white/45 sm:text-base"
+            className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-white/45 sm:text-base"
           >
             Crio experiências visuais que unem design, movimento e código — da identidade de marca
             ao pixel perfeito na tela.
           </motion.p>
 
-          <motion.div variants={ITEM} className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <motion.div variants={ITEM} className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <motion.a
               href="#portfolio"
               whileHover={{ scale: 1.04, boxShadow: '0 0 32px rgba(0,255,157,0.35)' }}
@@ -129,7 +129,7 @@ export default function Hero() {
 
           <motion.div
             variants={ITEM}
-            className="mt-16 flex flex-wrap justify-center gap-3 text-xs text-white/40"
+            className="mt-12 flex flex-wrap justify-center gap-3 text-xs text-white/40"
           >
             {['Motion Design', 'Branding', 'React', 'After Effects'].map((tag) => (
               <span

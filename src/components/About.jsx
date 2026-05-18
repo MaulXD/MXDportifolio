@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { Palette, Layers, Code2, Box } from 'lucide-react'
+import { Palette, Layers, Code2, Box, Languages } from 'lucide-react'
 
 const STATS = [
   { icon: Palette, value: '5+', label: 'Anos de experiência', color: 'text-neon-green' },
@@ -16,6 +16,11 @@ const SOFT_SKILLS = [
   'Gestão de tempo',
   'Trabalho em equipe',
   'Pensamento crítico',
+]
+
+const LANGUAGES = [
+  { lang: 'Português', level: 'Nativo' },
+  { lang: 'Inglês', level: 'Avançado — conversação e escrita' },
 ]
 
 export default function About() {
@@ -63,22 +68,49 @@ export default function About() {
               Camargo & Sarmento, unindo criatividade e organização em cada projeto.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-2">
-              {SOFT_SKILLS.map((skill, i) => (
-                <motion.span
-                  key={skill}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={inView ? { opacity: 1, scale: 1 } : {}}
-                  transition={{ delay: 0.4 + i * 0.06 }}
-                  className="rounded-full border border-neon-green/25 bg-neon-green/5 px-3 py-1.5 text-xs font-medium text-neon-green/90"
-                >
-                  {skill}
-                </motion.span>
-              ))}
-            </div>
+            <motion.div className="mt-8">
+              <p className="mb-3 text-xs font-medium uppercase tracking-widest text-white/40">
+                Soft skills
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {SOFT_SKILLS.map((skill, i) => (
+                  <motion.span
+                    key={skill}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={inView ? { opacity: 1, scale: 1 } : {}}
+                    transition={{ delay: 0.4 + i * 0.06 }}
+                    className="rounded-full border border-neon-green/25 bg-neon-green/5 px-3 py-1.5 text-xs font-medium text-neon-green/90"
+                  >
+                    {skill}
+                  </motion.span>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div className="mt-8">
+              <p className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-white/40">
+                <Languages size={14} className="text-neon-cyan" />
+                Idiomas
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {LANGUAGES.map((item, i) => (
+                  <motion.span
+                    key={item.lang}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={inView ? { opacity: 1, scale: 1 } : {}}
+                    transition={{ delay: 0.55 + i * 0.08 }}
+                    className="rounded-full border border-neon-cyan/25 bg-neon-cyan/5 px-3 py-1.5 text-xs font-medium text-neon-cyan/90"
+                  >
+                    <span className="text-white">{item.lang}</span>
+                    <span className="mx-1.5 text-white/25">·</span>
+                    {item.level}
+                  </motion.span>
+                ))}
+              </div>
+            </motion.div>
           </motion.div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <motion.div className="grid grid-cols-2 gap-4">
             {STATS.map((stat, i) => (
               <motion.div
                 key={stat.label}
@@ -96,7 +128,7 @@ export default function About() {
                 <p className="mt-1 text-xs text-white/50 sm:text-sm">{stat.label}</p>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </motion.div>
       </motion.div>
     </section>

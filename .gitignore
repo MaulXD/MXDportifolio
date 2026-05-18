@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Environment & Sanity local
+.env
+.env.*
+!.env.example
+.sanity/
+
 # Editor
 .vscode/*
 !.vscode/extensions.json

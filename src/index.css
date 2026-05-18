@@ -59,6 +59,36 @@
       linear-gradient(90deg, rgba(0, 255, 157, 0.04) 1px, transparent 1px);
     background-size: 48px 48px;
   }
+
+  /* Traço neon incompleto que percorre o card e some com fade */
+  .neon-card-stroke rect {
+    stroke-dasharray: 0.22 0.78;
+    stroke-dashoffset: 1;
+    opacity: 1;
+    animation: neon-card-stroke 1.15s ease-out forwards;
+  }
+
+  @keyframes neon-card-stroke {
+    0% {
+      stroke-dashoffset: 1;
+      opacity: 1;
+    }
+    68% {
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }
+    100% {
+      stroke-dashoffset: 0;
+      opacity: 0;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neon-card-stroke rect {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 .noise::after {

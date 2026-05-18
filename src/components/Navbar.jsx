@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Mail } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 
 const NAV_LINKS = [
   { label: 'Início', href: '#hero' },
@@ -11,12 +11,30 @@ const NAV_LINKS = [
   { label: 'Contato', href: '#contact' },
 ]
 
-const SECTION_IDS = NAV_LINKS.map((l) => l.href.slice(1))
+const SECTION_IDS = [...NAV_LINKS.map((l) => l.href.slice(1)), 'orcamento']
+
+const NAVBAR_SOLID = 'border-white/10 bg-bg-950/85 backdrop-blur-md'
+
+const MOBILE_MENU_PANEL =
+  'border border-white/10 bg-bg-950 shadow-[0_20px_50px_rgba(0,0,0,0.9)]'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('hero')
+  const [barHeight, setBarHeight] = useState(72)
+  const barRef = useRef(null)
+
+  const isSolid = scrolled || menuOpen
+
+  useEffect(() => {
+    const measure = () => {
+      if (barRef.current) setBarHeight(barRef.current.offsetHeight)
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [menuOpen, scrolled])
 
   useEffect(() => {
     const onScroll = () => {
@@ -53,11 +71,16 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed left-0 right-0 top-0 z-[100] transition-all duration-500 ${
-        scrolled ? 'border-b border-white/5 bg-bg-900/70 py-3 backdrop-blur-xl' : 'bg-transparent py-5'
+      className={`fixed left-0 right-0 top-0 z-[100] border-b transition-all duration-500 ${
+        isSolid ? `${NAVBAR_SOLID} py-3` : 'border-transparent bg-transparent py-5'
       }`}
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <motion.div
+        ref={barRef}
+        className={`relative z-[102] mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8 ${
+          isSolid ? 'bg-bg-950/95' : ''
+        }`}
+      >
         <a
           href="#hero"
           onClick={(e) => {
@@ -88,12 +111,12 @@ export default function Navbar() {
                   e.preventDefault()
                   handleNavClick(link.href)
                 }}
-                className="relative px-3 py-2 text-sm font-medium text-white/60 transition-colors hover:text-white"
+                className="relative px-3 py-2 text-sm font-medium text-white/80 transition-colors hover:text-white"
               >
                 {isActive && (
                   <motion.span
                     layoutId="nav-pill"
-                    className="absolute inset-0 rounded-lg border border-neon-green/20 bg-neon-green/10"
+                    className="absolute inset-0 rounded-lg border border-neon-green/30 bg-neon-green/15"
                     transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -106,66 +129,88 @@ export default function Navbar() {
         </nav>
 
         <motion.a
-          href="mailto:contato@raulxd.eu"
+          href="#orcamento"
+          onClick={(e) => {
+            e.preventDefault()
+            handleNavClick('#orcamento')
+          }}
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
-          className="glass-hover hidden items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-neon-green md:flex"
+          className="hidden items-center gap-2 rounded-xl bg-neon-green px-4 py-2 text-sm font-semibold text-bg-950 transition-shadow hover:shadow-[0_0_20px_rgba(0,255,157,0.35)] md:flex"
         >
-          <Mail size={16} />
-          E-mail
+          Solicitar Orçamento
         </motion.a>
 
         <button
           type="button"
           onClick={() => setMenuOpen((o) => !o)}
-          className="glass flex h-10 w-10 items-center justify-center rounded-xl text-white md:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-bg-950/85 text-white backdrop-blur-md md:hidden"
           aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
         >
           {menuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
-      </div>
+      </motion.div>
 
       <AnimatePresence>
         {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -12, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.97 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="glass absolute left-4 right-4 top-full mt-2 overflow-hidden rounded-2xl border border-white/10 md:hidden"
-          >
-            <nav className="flex flex-col p-2">
-              {NAV_LINKS.map((link, i) => {
-                const id = link.href.slice(1)
-                const isActive = activeSection === id
-                return (
-                  <motion.a
-                    key={link.href}
-                    href={link.href}
-                    initial={{ opacity: 0, x: -16 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      handleNavClick(link.href)
-                    }}
-                    className={`rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
-                      isActive ? 'bg-neon-green/10 text-neon-green' : 'text-white/70 hover:bg-white/5'
-                    }`}
-                  >
-                    {link.label}
-                  </motion.a>
-                )
-              })}
-              <a
-                href="mailto:contato@raulxd.eu"
-                className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-neon-green/10 px-4 py-3 text-sm font-medium text-neon-green"
-              >
-                <Mail size={16} />
-                contato@raulxd.eu
-              </a>
-            </nav>
-          </motion.div>
+          <>
+            <motion.div
+              key="menu-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed left-0 right-0 bottom-0 z-[99] bg-bg-950/95 backdrop-blur-md md:hidden"
+              style={{ top: barHeight }}
+              onClick={() => setMenuOpen(false)}
+              aria-hidden
+            />
+            <motion.div
+              key="menu-panel"
+              initial={{ opacity: 0, y: -12, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.97 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className={`absolute left-4 right-4 top-full z-[101] mt-2 overflow-hidden rounded-2xl ${MOBILE_MENU_PANEL} md:hidden`}
+            >
+              <nav className="flex flex-col bg-bg-950 p-2">
+                {NAV_LINKS.map((link, i) => {
+                  const id = link.href.slice(1)
+                  const isActive = activeSection === id
+                  return (
+                    <motion.a
+                      key={link.href}
+                      href={link.href}
+                      initial={{ opacity: 0, x: -16 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        handleNavClick(link.href)
+                      }}
+                      className={`rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
+                        isActive
+                          ? 'bg-neon-green/20 text-neon-green'
+                          : 'text-white hover:bg-bg-800'
+                      }`}
+                    >
+                      {link.label}
+                    </motion.a>
+                  )
+                })}
+                <a
+                  href="#orcamento"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    handleNavClick('#orcamento')
+                  }}
+                  className="mt-2 flex items-center justify-center rounded-xl bg-neon-green px-4 py-3.5 text-sm font-semibold text-bg-950 transition-shadow hover:shadow-[0_0_24px_rgba(0,255,157,0.35)]"
+                >
+                  Solicitar Orçamento
+                </a>
+              </nav>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </header>

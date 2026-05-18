@@ -64,16 +64,18 @@ const FIELD_CLASS =
 
 const LABEL_CLASS = 'mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/50'
 
-function buildWhatsAppMessage({
-  fullName,
-  phone,
-  personType,
-  cnpj,
-  selectedServices,
-  siteType,
-  streamItems,
-  notes,
-}) {
+function buildWhatsAppMessage(data) {
+  const {
+    fullName,
+    phone,
+    personType,
+    cnpj,
+    selectedServices,
+    siteType,
+    streamItems,
+    notes,
+  } = data
+
   const lines = [
     'Olá Raul! Gostaria de um orçamento.',
     '',
@@ -89,13 +91,13 @@ function buildWhatsAppMessage({
   lines.push('', 'O que você precisa:')
   selectedServices.forEach((item) => lines.push(`  • ${item}`))
 
-  if (selectedServices.includes(STREAM_PACK_LABEL) && streamItems.length > 0) {
-    lines.push('', 'Stream pack — detalhes:')
+  if (selectedServices.includes(STREAM_PACK_LABEL)) {
+    lines.push('', 'Stream pack:')
     streamItems.forEach((item) => lines.push(`  • ${item}`))
   }
 
   if (selectedServices.includes(SITE_LABEL) && siteType) {
-    lines.push('', `Tipo de site: ${siteType}`)
+    lines.push('', 'Tipo de site:', `  • ${siteType}`)
   }
 
   if (notes.trim()) {
@@ -103,6 +105,26 @@ function buildWhatsAppMessage({
   }
 
   return lines.join('\n')
+}
+
+function validateForm(data) {
+  const next = {}
+  const hasStream = data.selectedServices.includes(STREAM_PACK_LABEL)
+  const hasSite = data.selectedServices.includes(SITE_LABEL)
+
+  if (!data.personType) next.personType = 'Selecione Pessoa Física ou Jurídica.'
+  if (data.personType === 'pj' && !data.cnpj.trim()) next.cnpj = 'Informe o CNPJ.'
+  if (!data.fullName.trim()) next.fullName = 'Informe seu nome completo.'
+  if (!data.phone.trim()) next.phone = 'Informe seu telefone.'
+  if (data.selectedServices.length === 0) {
+    next.selectedServices = 'Marque pelo menos um serviço.'
+  }
+  if (hasStream && data.streamItems.length === 0) {
+    next.streamItems = 'Selecione ao menos um item do stream pack.'
+  }
+  if (hasSite && !data.siteType) next.siteType = 'Selecione o tipo de site.'
+
+  return { valid: Object.keys(next).length === 0, errors: next }
 }
 
 function PersonTypeSelector({ value, onChange, error }) {
@@ -222,8 +244,8 @@ export default function BudgetForm() {
   const includesStream = selectedServices.includes(STREAM_PACK_LABEL)
   const includesSite = selectedServices.includes(SITE_LABEL)
 
-  const toggleListItem = (list, setList, label) => {
-    setList((prev) =>
+  const toggleStreamItem = (label) => {
+    setStreamItems((prev) =>
       prev.includes(label) ? prev.filter((i) => i !== label) : [...prev, label],
     )
   }
@@ -246,46 +268,33 @@ export default function BudgetForm() {
     }))
   }
 
-  const validate = () => {
-    const next = {}
-
-    if (!personType) next.personType = 'Selecione Pessoa Física ou Jurídica.'
-    if (isPJ && !cnpj.trim()) next.cnpj = 'Informe o CNPJ.'
-    if (!fullName.trim()) next.fullName = 'Informe seu nome completo.'
-    if (!phone.trim()) next.phone = 'Informe seu telefone.'
-    if (selectedServices.length === 0) {
-      next.selectedServices = 'Marque pelo menos um serviço.'
-    }
-    if (includesStream && streamItems.length === 0) {
-      next.streamItems = 'Selecione ao menos um item do stream pack.'
-    }
-    if (includesSite && !siteType) next.siteType = 'Selecione o tipo de site.'
-
-    setErrors(next)
-    return Object.keys(next).length === 0
-  }
+  const getFormData = () => ({
+    personType,
+    cnpj,
+    fullName,
+    phone,
+    selectedServices: [...selectedServices],
+    siteType,
+    streamItems: [...streamItems],
+    notes,
+  })
 
   const handleSubmit = (e) => {
     e.preventDefault()
     setSubmitAttempted(true)
-    if (!validate()) return
 
-    const message = buildWhatsAppMessage({
-      fullName,
-      phone,
-      personType,
-      cnpj,
-      selectedServices,
-      siteType,
-      streamItems,
-      notes,
-    })
+    const data = getFormData()
+    const { valid, errors: nextErrors } = validateForm(data)
+    setErrors(nextErrors)
+    if (!valid) return
 
-    window.open(
-      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
-      '_blank',
-      'noopener,noreferrer',
-    )
+    const message = buildWhatsAppMessage(data)
+    const url = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(message)}`
+
+    const opened = window.open(url, '_blank', 'noopener,noreferrer')
+    if (!opened) {
+      window.location.href = url
+    }
   }
 
   const errorClass = (field) =>
@@ -473,7 +482,7 @@ export default function BudgetForm() {
                     selected={streamItems}
                     accent="violet"
                     onToggle={(label) => {
-                      toggleListItem(streamItems, setStreamItems, label)
+                      toggleStreamItem(label)
                       if (errors.streamItems) setErrors((p) => ({ ...p, streamItems: undefined }))
                     }}
                     error={submitAttempted ? errors.streamItems : ''}

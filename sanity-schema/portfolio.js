@@ -1,8 +1,9 @@
+import { PORTFOLIO_CATEGORY_OPTIONS } from '../src/lib/portfolioCategories.js'
+
 /**
  * Schema do documento "portfolio" para o Sanity Studio.
  */
-export default {
-  name: 'portfolio',
+export default {  name: 'portfolio',
   title: 'Portfólio',
   type: 'document',
   fields: [
@@ -14,25 +15,41 @@ export default {
     },
     {
       name: 'slug',
-      title: 'Slug',
+      title: 'URL da página (slug)',
       type: 'slug',
+      description:
+        'Nome do endereço no site. Ex.: motion-snow → raulluz.com/projeto/motion-snow. Clique em "Generate" a partir do título ou edite o campo manualmente.',
       options: {
         source: 'title',
         maxLength: 96,
+        slugify: (input) =>
+          input
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+            .slice(0, 96),
       },
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) =>
+        Rule.required().custom((slug) => {
+          const value = slug?.current
+          if (!value) return 'Defina a URL da página.'
+          if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
+            return 'Use apenas letras minúsculas, números e hífens (ex.: meu-projeto-2024).'
+          }
+          return true
+        }),
     },
     {
       name: 'category',
-      title: 'Categoria',
+      title: 'Tipo de projeto',
       type: 'string',
+      description:
+        'Mesmas categorias do formulário de orçamento (Motion, Stream pack, Site, etc.).',
       options: {
-        list: [
-          { title: 'Motion', value: 'Motion' },
-          { title: 'Branding', value: 'Branding' },
-          { title: 'Ilustração', value: 'Ilustração' },
-        ],
-        layout: 'radio',
+        list: PORTFOLIO_CATEGORY_OPTIONS,
+        layout: 'dropdown',
       },
       validation: (Rule) => Rule.required(),
     },
@@ -47,6 +64,13 @@ export default {
           name: 'galeriaItem',
           title: 'Mídia',
           fields: [
+            {
+              name: 'legenda',
+              title: 'Legenda',
+              type: 'string',
+              description:
+                'Nome exibido no site para esta mídia (ex.: Capa, Versão final, Thumbnail 02). Deixe em branco para usar o número da mídia.',
+            },
             {
               name: 'tipoMedia',
               title: 'Tipo de Mídia',
@@ -73,13 +97,14 @@ export default {
           ],
           preview: {
             select: {
+              legenda: 'legenda',
               tipoMedia: 'tipoMedia',
               filename: 'asset.asset.originalFilename',
             },
-            prepare({ tipoMedia, filename }) {
+            prepare({ legenda, tipoMedia, filename }) {
               return {
-                title: tipoMedia || 'Mídia',
-                subtitle: filename || 'Sem arquivo',
+                title: legenda?.trim() || tipoMedia || 'Mídia',
+                subtitle: [tipoMedia, filename].filter(Boolean).join(' · ') || 'Sem arquivo',
               }
             },
           },

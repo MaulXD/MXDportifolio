@@ -1,26 +1,45 @@
-import Navbar from './components/Navbar'
-import Hero from './components/Hero'
-import About from './components/About'
-import Skills from './components/Skills'
-import Experience from './components/Experience'
-import Portfolio from './components/Portfolio'
-import BudgetForm from './components/BudgetForm'
-import Contact from './components/Contact'
+import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import HomePage from './pages/HomePage'
+import ProjectPage from './pages/ProjectPage'
 
-export default function App() {
+function ScrollToHash() {
+  const { pathname, hash } = useLocation()
+
+  useEffect(() => {
+    if (!hash) {
+      window.scrollTo(0, 0)
+      return
+    }
+    const id = hash.replace('#', '')
+    const el = document.getElementById(id)
+    if (el) {
+      requestAnimationFrame(() => {
+        el.scrollIntoView({ behavior: 'smooth' })
+      })
+    }
+  }, [pathname, hash])
+
+  return null
+}
+
+function AppShell() {
   return (
     <div className="noise relative min-h-screen overflow-x-hidden">
       <div className="pointer-events-none fixed inset-0 bg-grid opacity-40" aria-hidden />
-      <Navbar />
-      <main>
-        <Hero />
-        <About />
-        <Skills />
-        <Experience />
-        <Portfolio />
-        <BudgetForm />
-        <Contact />
-      </main>
+      <ScrollToHash />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/projeto/:slug" element={<ProjectPage />} />
+      </Routes>
     </div>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppShell />
+    </BrowserRouter>
   )
 }

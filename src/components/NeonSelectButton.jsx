@@ -66,7 +66,9 @@ export default function NeonSelectButton({
       ? 'flex-col items-center gap-2 px-3 py-4 text-center'
       : 'items-center gap-2.5 px-3 py-2.5 text-left text-sm'
 
-  const handleClick = () => {
+  const handleClick = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
     onClick()
     measure()
     setStrokeKey((k) => k + 1)

@@ -114,16 +114,16 @@ export default function Hero() {
               Ver Portfólio
             </motion.a>
             <motion.a
-              href="#contact"
+              href="#orcamento"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
               onClick={(e) => {
                 e.preventDefault()
-                document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })
+                document.querySelector('#orcamento')?.scrollIntoView({ behavior: 'smooth' })
               }}
               className="glass-hover rounded-xl px-8 py-3.5 text-sm font-medium text-white"
             >
-              Fale Comigo
+              Faça um orçamento
             </motion.a>
           </motion.div>
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 
@@ -19,6 +20,9 @@ const MOBILE_MENU_PANEL =
   'border border-white/10 bg-bg-950 shadow-[0_20px_50px_rgba(0,0,0,0.9)]'
 
 export default function Navbar() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const isHome = location.pathname === '/'
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('hero')
@@ -37,6 +41,8 @@ export default function Navbar() {
   }, [menuOpen, scrolled])
 
   useEffect(() => {
+    if (!isHome) return undefined
+
     const onScroll = () => {
       setScrolled(window.scrollY > 40)
 
@@ -54,7 +60,7 @@ export default function Navbar() {
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
     return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  }, [isHome])
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : ''
@@ -65,8 +71,12 @@ export default function Navbar() {
 
   const handleNavClick = (href) => {
     setMenuOpen(false)
-    const el = document.querySelector(href)
-    el?.scrollIntoView({ behavior: 'smooth' })
+    if (isHome) {
+      const el = document.querySelector(href)
+      el?.scrollIntoView({ behavior: 'smooth' })
+      return
+    }
+    navigate(`/${href}`)
   }
 
   return (
@@ -81,12 +91,9 @@ export default function Navbar() {
           isSolid ? 'bg-bg-950/95' : ''
         }`}
       >
-        <a
-          href="#hero"
-          onClick={(e) => {
-            e.preventDefault()
-            handleNavClick('#hero')
-          }}
+        <Link
+          to="/"
+          onClick={() => setMenuOpen(false)}
           className="group flex items-center gap-2.5"
         >
           <img
@@ -97,7 +104,7 @@ export default function Navbar() {
           <span className="font-display text-lg font-bold tracking-tight text-white">
             Raul<span className="text-neon-green">.</span>Luz
           </span>
-        </a>
+        </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((link) => {

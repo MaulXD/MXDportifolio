@@ -12,23 +12,40 @@ export const sanityClient = isSanityConfigured
       projectId,
       dataset,
       apiVersion: '2024-05-17',
-      useCdn: true,
+      // CDN retorna 404 neste projeto; API direta funciona e é pública para leitura
+      useCdn: false,
     })
   : null
 
-export const PORTFOLIO_QUERY = `*[_type == "portfolio"] | order(_createdAt desc) {
+const PORTFOLIO_FIELDS = `{
   _id,
   title,
   "slug": slug.current,
   category,
-  mediaType,
   "legacyMediaUrl": coalesce(mediaFile.asset->url, null),
-  "galeria": coalesce(
-    galeria[]{
-      "tipoMedia": coalesce(tipoMedia, "Imagem"),
-      "mediaUrl": coalesce(asset.asset->url, asset->url, null)
-    },
-    []
-  ),
+  "legacyMediaType": coalesce(mediaType, "Imagem"),
+  "galeria": galeria[]{
+    "legenda": coalesce(legenda, ""),
+    "tipoMedia": coalesce(tipoMedia, "Imagem"),
+    "mediaUrl": asset.asset->url
+  },
   externalLink
 }`
+
+export const PORTFOLIO_QUERY = `*[_type == "portfolio"] | order(_createdAt desc) ${PORTFOLIO_FIELDS}`
+
+export const PROJECT_BY_SLUG_QUERY = `*[_type == "portfolio" && slug.current == $slug][0] ${PORTFOLIO_FIELDS}`
+
+export const PROJECT_BY_ID_QUERY = `*[_type == "portfolio" && _id == $id][0] ${PORTFOLIO_FIELDS}`
+
+/** Mensagem amigável conforme o tipo de falha */
+export function getSanityErrorMessage(err) {
+  const msg = err?.message ?? String(err)
+  if (/cors|blocked|fetch failed/i.test(msg)) {
+    return 'CORS bloqueou a API do Sanity. Em sanity.io/manage → API → CORS, adicione http://localhost:5173 e o domínio do site publicado.'
+  }
+  if (/404|not found/i.test(msg)) {
+    return 'Projeto ou dataset do Sanity não encontrado. Confira VITE_SANITY_PROJECT_ID e VITE_SANITY_DATASET no .env.'
+  }
+  return `Erro ao carregar projetos: ${msg}`
+}

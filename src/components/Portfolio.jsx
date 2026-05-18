@@ -1,262 +1,46 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
-import { ExternalLink, Play, PenLine, Image, Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
-import { sanityClient, PORTFOLIO_QUERY, isSanityConfigured } from '../lib/sanityClient'
+import {
+  Clapperboard,
+  Film,
+  PenTool,
+  Image as ImageIcon,
+  Radio,
+  Globe,
+  Layers,
+  HelpCircle,
+  Loader2,
+} from 'lucide-react'
+import GalleryMedia from './GalleryMedia'
+import { usePortfolioProjects } from '../lib/usePortfolioProjects'
+import {
+  CATEGORIES,
+  accentMap,
+  getCategoryMeta,
+  getGallerySummary,
+  getProjectPath,
+} from '../lib/portfolioUtils'
 
-const CATEGORIES = ['Todos', 'Motion', 'Branding', 'Ilustração']
-
-const CATEGORY_META = {
-  Motion: { icon: Play, accent: 'neon-violet' },
-  Branding: { icon: PenLine, accent: 'neon-pink' },
-  Ilustração: { icon: Image, accent: 'neon-cyan' },
-}
-
-const accentMap = {
-  'neon-violet': {
-    border: 'group-hover:border-neon-violet/30',
-    glow: 'group-hover:shadow-[0_0_40px_rgba(139,92,246,0.15)]',
-    line: 'bg-neon-violet',
-    icon: 'text-neon-violet',
-    badge: 'bg-neon-violet/10 text-neon-violet border-neon-violet/20',
-    dot: 'bg-neon-violet',
-  },
-  'neon-pink': {
-    border: 'group-hover:border-neon-pink/30',
-    glow: 'group-hover:shadow-[0_0_40px_rgba(255,0,102,0.15)]',
-    line: 'bg-neon-pink',
-    icon: 'text-neon-pink',
-    badge: 'bg-neon-pink/10 text-neon-pink border-neon-pink/20',
-    dot: 'bg-neon-pink',
-  },
-  'neon-cyan': {
-    border: 'group-hover:border-neon-cyan/30',
-    glow: 'group-hover:shadow-[0_0_40px_rgba(14,165,233,0.15)]',
-    line: 'bg-neon-cyan',
-    icon: 'text-neon-cyan',
-    badge: 'bg-neon-cyan/10 text-neon-cyan border-neon-cyan/20',
-    dot: 'bg-neon-cyan',
-  },
-}
-
-function getCategoryMeta(category) {
-  return CATEGORY_META[category] ?? CATEGORY_META.Motion
-}
-
-/** Normaliza galeria nova + fallback do campo legado mediaFile/mediaType */
-function normalizeProject(raw) {
-  if (!raw || typeof raw !== 'object') return null
-
-  const fromGaleria = (Array.isArray(raw.galeria) ? raw.galeria : [])
-    .filter((item) => item && typeof item.mediaUrl === 'string' && item.mediaUrl.length > 0)
-    .map((item) => ({
-      tipoMedia: item?.tipoMedia === 'Vídeo' ? 'Vídeo' : 'Imagem',
-      mediaUrl: item.mediaUrl,
-    }))
-
-  let galeria = fromGaleria
-
-  if (galeria.length === 0 && raw.legacyMediaUrl) {
-    galeria = [
-      {
-        tipoMedia: raw.mediaType === 'Vídeo' ? 'Vídeo' : 'Imagem',
-        mediaUrl: raw.legacyMediaUrl,
-      },
-    ]
-  }
-
-  return {
-    _id: raw._id ?? raw.slug ?? `project-${Math.random().toString(36).slice(2)}`,
-    title: raw.title ?? 'Projeto sem título',
-    slug: raw.slug ?? null,
-    category: raw.category ?? 'Motion',
-    externalLink: raw.externalLink ?? null,
-    galeria,
-  }
-}
-
-function getGallerySummary(galeria) {
-  const list = Array.isArray(galeria) ? galeria : []
-  const valid = list.filter((item) => item?.mediaUrl)
-  const videos = valid.filter((item) => item?.tipoMedia === 'Vídeo').length
-  const images = valid.filter((item) => item?.tipoMedia === 'Imagem').length
-  const parts = []
-  if (videos) parts.push(`${videos} vídeo${videos > 1 ? 's' : ''}`)
-  if (images) parts.push(`${images} imagem${images > 1 ? 'ns' : ''}`)
-  return { valid, label: parts.length ? parts.join(' · ') : 'Sem mídia' }
-}
-
-function GalleryMedia({ galeria, title, accent }) {
-  const { valid } = getGallerySummary(galeria)
-  const [index, setIndex] = useState(0)
-  const hasMultiple = valid.length > 1
-  const current = valid[index] ?? null
-
-  const goTo = useCallback(
-    (next) => {
-      if (!hasMultiple) return
-      setIndex((i) => (i + next + valid.length) % valid.length)
-    },
-    [hasMultiple, valid.length],
-  )
-
-  useEffect(() => {
-    setIndex(0)
-  }, [galeria])
-
-  if (!current?.mediaUrl) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <img
-          src="/mxd-logo.png"
-          alt=""
-          className="h-16 w-16 rounded-full object-cover opacity-30"
-          aria-hidden
-        />
-      </div>
-    )
-  }
-
-  const isVideo = current?.tipoMedia === 'Vídeo'
-
-  return (
-    <>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`${current.mediaUrl}-${index}`}
-          initial={{ opacity: 0, scale: 1.03 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.97 }}
-          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute inset-0"
-        >
-          {isVideo ? (
-            <video
-              src={current.mediaUrl}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <img
-              src={current.mediaUrl}
-              alt={title ?? 'Projeto'}
-              className="h-full w-full object-cover"
-              loading="lazy"
-            />
-          )}
-        </motion.div>
-      </AnimatePresence>
-
-      {hasMultiple && (
-        <>
-          <motion.div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-bg-950/80 to-transparent px-3 pb-3 pt-8">
-            <div className="flex justify-center gap-1.5">
-              {valid.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setIndex(i)
-                  }}
-                  aria-label={`Mídia ${i + 1}`}
-                  className={`h-1.5 rounded-full transition-all ${
-                    i === index ? `w-5 ${accent?.dot ?? 'bg-neon-green'}` : 'w-1.5 bg-white/35 hover:bg-white/60'
-                  }`}
-                />
-              ))}
-            </div>
-          </motion.div>
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              goTo(-1)
-            }}
-            className="absolute left-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg border border-white/10 bg-bg-950/80 text-white opacity-0 backdrop-blur-md transition-opacity group-hover:opacity-100"
-            aria-label="Mídia anterior"
-          >
-            <ChevronLeft size={16} />
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              goTo(1)
-            }}
-            className="absolute right-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg border border-white/10 bg-bg-950/80 text-white opacity-0 backdrop-blur-md transition-opacity group-hover:opacity-100"
-            aria-label="Próxima mídia"
-          >
-            <ChevronRight size={16} />
-          </button>
-
-          <span className="absolute right-2 top-2 z-10 rounded-full border border-white/10 bg-bg-950/80 px-2 py-0.5 text-[10px] font-medium text-white/70 backdrop-blur-md">
-            {index + 1}/{valid.length}
-          </span>
-        </>
-      )}
-    </>
-  )
+const CATEGORY_ICONS = {
+  Clapperboard,
+  Film,
+  PenTool,
+  Image: ImageIcon,
+  Radio,
+  Globe,
+  Layers,
+  HelpCircle,
 }
 
 export default function Portfolio() {
   const [filter, setFilter] = useState('Todos')
-  const [projects, setProjects] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { projects, loading, error } = usePortfolioProjects()
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
 
-  useEffect(() => {
-    let cancelled = false
-
-    async function fetchProjects() {
-      try {
-        setLoading(true)
-        setError(null)
-
-        if (!isSanityConfigured || !sanityClient) {
-          if (!cancelled) {
-            setProjects([])
-            setError(
-              'Sanity não configurado. Defina VITE_SANITY_PROJECT_ID e VITE_SANITY_DATASET no arquivo .env',
-            )
-          }
-          return
-        }
-
-        const data = await sanityClient.fetch(PORTFOLIO_QUERY)
-        const normalized = (Array.isArray(data) ? data : [])
-          .map((item) => normalizeProject(item))
-          .filter(Boolean)
-
-        if (!cancelled) setProjects(normalized)
-      } catch (err) {
-        console.error('[Portfolio] Erro ao buscar projetos no Sanity:', err)
-        if (!cancelled) {
-          setError(
-            'Não foi possível carregar os projetos. Verifique CORS no Sanity e se o schema está publicado.',
-          )
-          setProjects([])
-        }
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
-
-    fetchProjects()
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
   const filtered =
-    filter === 'Todos'
-      ? projects
-      : projects.filter((p) => p?.category === filter)
+    filter === 'Todos' ? projects : projects.filter((p) => p?.category === filter)
 
   return (
     <section id="portfolio" className="relative py-24 sm:py-32">
@@ -272,7 +56,7 @@ export default function Portfolio() {
           Projetos <span className="text-neon">selecionados</span>
         </h2>
 
-        <motion.div className="mt-8 flex flex-wrap gap-2">
+        <motion.div className="mt-8 flex flex-wrap gap-2 sm:gap-2.5">
           {CATEGORIES.map((cat) => {
             const isActive = filter === cat
             return (
@@ -280,7 +64,7 @@ export default function Portfolio() {
                 key={cat}
                 type="button"
                 onClick={() => setFilter(cat)}
-                className="relative rounded-xl px-4 py-2 text-sm font-medium transition-colors"
+                className="relative rounded-xl px-3 py-2 text-xs font-medium transition-colors sm:px-4 sm:text-sm"
               >
                 {isActive && (
                   <motion.span
@@ -324,11 +108,11 @@ export default function Portfolio() {
               {filtered.map((project) => {
                 if (!project) return null
 
-                const meta = getCategoryMeta(project?.category)
+                const meta = getCategoryMeta(project.category)
                 const styles = accentMap[meta.accent] ?? accentMap['neon-violet']
-                const Icon = meta.icon
-                const projectLink = project?.externalLink
-                const { valid, label } = getGallerySummary(project?.galeria)
+                const Icon = CATEGORY_ICONS[meta.iconName] ?? Clapperboard
+                const projectPath = getProjectPath(project)
+                const { valid, label } = getGallerySummary(project.galeria)
 
                 return (
                   <motion.article
@@ -341,55 +125,49 @@ export default function Portfolio() {
                     whileHover={{ y: -7 }}
                     className={`group relative overflow-hidden rounded-2xl border border-white/5 bg-bg-800/60 transition-all duration-300 ${styles.border} ${styles.glow}`}
                   >
-                    <div className="relative aspect-[4/3] overflow-hidden bg-bg-700/50">
-                      <GalleryMedia
-                        galeria={project?.galeria}
-                        title={project?.title}
-                        accent={styles}
-                      />
+                    <Link to={projectPath} className="block">
+                      <div className="relative aspect-[4/3] overflow-hidden bg-bg-700/50">
+                        <GalleryMedia
+                          galeria={project.galeria}
+                          title={project.title}
+                          accent={styles}
+                        />
 
-                      <motion.div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,255,157,0.08)_0%,transparent_70%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,255,157,0.08)_0%,transparent_70%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
-                      {projectLink && (
                         <motion.div className="absolute inset-0 flex items-center justify-center bg-bg-950/60 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">
-                          <a
-                            href={projectLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="pointer-events-auto flex items-center gap-2 rounded-xl bg-neon-green px-4 py-2 text-sm font-semibold text-bg-950"
-                          >
-                            Ver projeto <ExternalLink size={14} />
-                          </a>
+                          <span className="rounded-xl bg-neon-green px-4 py-2 text-sm font-semibold text-bg-950">
+                            Ver projeto
+                          </span>
                         </motion.div>
-                      )}
-                    </div>
-
-                    <div className="relative p-5">
-                      <div className="mb-3 flex items-center justify-between">
-                        <Icon size={18} className={styles.icon} />
-                        <span
-                          className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${styles.badge}`}
-                        >
-                          {project?.category ?? '—'}
-                        </span>
                       </div>
-                      <h3 className="font-display text-base font-bold text-white">
-                        {project?.title ?? 'Projeto'}
-                      </h3>
-                      <p className="mt-2 text-xs text-white/40">
-                        {valid.length > 1 ? `${valid.length} mídias · ${label}` : label}
-                      </p>
-                      <motion.div
-                        className={`absolute bottom-0 left-0 h-0.5 w-0 ${styles.line} transition-all duration-500 group-hover:w-full`}
-                      />
-                    </div>
+
+                      <div className="relative p-5">
+                        <div className="mb-3 flex items-center justify-between">
+                          <Icon size={18} className={styles.icon} />
+                          <span
+                            className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${styles.badge}`}
+                          >
+                            {project.category ?? '—'}
+                          </span>
+                        </div>
+                        <h3 className="font-display text-base font-bold text-white">
+                          {project.title ?? 'Projeto'}
+                        </h3>
+                        <p className="mt-2 text-xs text-white/40">
+                          {valid.length > 1 ? `${valid.length} mídias · ${label}` : label}
+                        </p>
+                        <div
+                          className={`absolute bottom-0 left-0 h-0.5 w-0 ${styles.line} transition-all duration-500 group-hover:w-full`}
+                        />
+                      </div>
+                    </Link>
                   </motion.article>
                 )
               })}
             </AnimatePresence>
           </motion.div>
         )}
-
       </motion.div>
     </section>
   )

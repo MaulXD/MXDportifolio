@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Film, Image as ImageIcon } from 'lucide-react'
 import { getGaleriaPastas, getMediaLabel } from '../lib/portfolioUtils'
 import { useLightMotion } from '../hooks/useLightMotion'
+import LoopVideo from './LoopVideo'
 
 function ThumbButton({ item, index, active, onSelect }) {
   const isVideo = item.tipoMedia === 'Vídeo'
@@ -24,10 +25,8 @@ function ThumbButton({ item, index, active, onSelect }) {
     >
       <div className="flex h-full w-full items-center justify-center p-1.5 sm:p-2">
         {isVideo ? (
-          <video
+          <LoopVideo
             src={item.mediaUrl}
-            muted
-            playsInline
             className="h-auto w-auto max-h-full max-w-full object-contain rounded-lg"
           />
         ) : (
@@ -97,16 +96,7 @@ export default function ProjectGallery({
   }`
 
   const mainMedia = isVideo ? (
-    <video
-      key={current.mediaUrl}
-      src={current.mediaUrl}
-      autoPlay
-      loop
-      muted
-      playsInline
-      controls
-      className={mainMediaClass}
-    />
+    <LoopVideo key={current.mediaUrl} src={current.mediaUrl} className={mainMediaClass} />
   ) : (
     <img
       key={current.mediaUrl}

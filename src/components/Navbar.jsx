@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 
 const NAV_LINKS = [
@@ -15,7 +15,7 @@ const NAV_LINKS = [
 
 const SECTION_IDS = [...NAV_LINKS.map((l) => l.href.slice(1)), 'orcamento']
 
-const NAVBAR_SOLID = 'border-white/10 bg-bg-950/85 backdrop-blur-md'
+const NAVBAR_SOLID = 'border-white/10 bg-bg-950'
 
 const MOBILE_MENU_PANEL =
   'border border-white/10 bg-bg-950 shadow-[0_20px_50px_rgba(0,0,0,0.9)]'
@@ -45,6 +45,8 @@ export default function Navbar() {
     if (!isHome) return undefined
 
     const onScroll = () => {
+      if (menuOpen) return
+
       setScrolled(window.scrollY > 40)
 
       const offset = 120
@@ -61,7 +63,7 @@ export default function Navbar() {
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
     return () => window.removeEventListener('scroll', onScroll)
-  }, [isHome])
+  }, [isHome, menuOpen])
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : ''
@@ -82,15 +84,13 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed left-0 right-0 top-0 z-[100] border-b transition-all duration-500 ${
-        isSolid ? `${NAVBAR_SOLID} py-3` : 'border-transparent bg-transparent py-5'
-      }`}
+      className={`fixed left-0 right-0 top-0 z-[100] border-b ${
+        menuOpen ? 'transition-none' : 'transition-[border-color,background-color,padding] duration-300'
+      } ${isSolid ? `${NAVBAR_SOLID} py-3` : 'border-transparent bg-transparent py-5'}`}
     >
-      <motion.div
+      <div
         ref={barRef}
-        className={`relative z-[102] mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8 ${
-          isSolid ? 'bg-bg-950/95' : ''
-        }`}
+        className="relative z-[102] mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8"
       >
         <Link
           to="/"
@@ -152,75 +152,62 @@ export default function Navbar() {
         <button
           type="button"
           onClick={() => setMenuOpen((o) => !o)}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-bg-950/85 text-white backdrop-blur-md md:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-bg-950 text-white md:hidden"
           aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
         >
           {menuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
-      </motion.div>
+      </div>
 
-      <AnimatePresence>
-        {menuOpen && (
-          <>
-            <motion.div
-              key="menu-backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed left-0 right-0 bottom-0 z-[99] bg-bg-950/95 backdrop-blur-md md:hidden"
-              style={{ top: barHeight }}
-              onClick={() => setMenuOpen(false)}
-              aria-hidden
-            />
-            <motion.div
-              key="menu-panel"
-              initial={{ opacity: 0, y: -12, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -12, scale: 0.97 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className={`absolute left-4 right-4 top-full z-[101] mt-2 overflow-hidden rounded-2xl ${MOBILE_MENU_PANEL} md:hidden`}
-            >
-              <nav className="flex flex-col bg-bg-950 p-2">
-                {NAV_LINKS.map((link, i) => {
-                  const id = link.href.slice(1)
-                  const isActive = activeSection === id
-                  return (
-                    <motion.a
-                      key={link.href}
-                      href={link.href}
-                      initial={{ opacity: 0, x: -16 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        handleNavClick(link.href)
-                      }}
-                      className={`rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
-                        isActive
-                          ? 'bg-neon-green/20 text-neon-green'
-                          : 'text-white hover:bg-bg-800'
-                      }`}
-                    >
-                      {link.label}
-                    </motion.a>
-                  )
-                })}
-                <a
-                  href="#orcamento"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    handleNavClick('#orcamento')
-                  }}
-                  className="mt-2 flex items-center justify-center rounded-xl bg-neon-green px-4 py-3.5 text-sm font-semibold text-bg-950 transition-shadow hover:shadow-[0_0_24px_rgba(0,255,157,0.35)]"
-                >
-                  Solicitar Orçamento
-                </a>
-              </nav>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {menuOpen && (
+        <>
+          <div
+            className="fixed left-0 right-0 bottom-0 z-[99] bg-bg-950 md:hidden"
+            style={{ top: barHeight }}
+            onClick={() => setMenuOpen(false)}
+            onKeyDown={(e) => e.key === 'Escape' && setMenuOpen(false)}
+            role="presentation"
+            aria-hidden
+          />
+          <div
+            className={`absolute left-4 right-4 top-full z-[101] mt-2 overflow-hidden rounded-2xl ${MOBILE_MENU_PANEL} md:hidden`}
+          >
+            <nav className="flex flex-col bg-bg-950 p-2">
+              {NAV_LINKS.map((link) => {
+                const id = link.href.slice(1)
+                const isActive = activeSection === id
+                return (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      handleNavClick(link.href)
+                    }}
+                    className={`rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-neon-green/20 text-neon-green'
+                        : 'text-white hover:bg-bg-800'
+                    }`}
+                  >
+                    {link.label}
+                  </a>
+                )
+              })}
+              <a
+                href="#orcamento"
+                onClick={(e) => {
+                  e.preventDefault()
+                  handleNavClick('#orcamento')
+                }}
+                className="mt-2 flex items-center justify-center rounded-xl bg-neon-green px-4 py-3.5 text-sm font-semibold text-bg-950 transition-shadow hover:shadow-[0_0_24px_rgba(0,255,157,0.35)]"
+              >
+                Solicitar Orçamento
+              </a>
+            </nav>
+          </div>
+        </>
+      )}
     </header>
   )
 }

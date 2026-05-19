@@ -23,6 +23,20 @@ const ACCENTS = {
     bg: 'bg-neon-violet/10',
     glow: 'shadow-[0_0_12px_rgba(139,92,246,0.25)]',
   },
+  amber: {
+    stroke: '#F59E0B',
+    strokeEnd: '#00FF9D',
+    border: 'border-neon-amber/40',
+    bg: 'bg-neon-amber/10',
+    glow: 'shadow-[0_0_12px_rgba(245,158,11,0.25)]',
+  },
+  whatsapp: {
+    stroke: '#25D366',
+    strokeEnd: '#00FF9D',
+    border: 'border-[#25D366]/40',
+    bg: 'bg-[#25D366]/10',
+    glow: 'shadow-[0_0_12px_rgba(37,211,102,0.3)]',
+  },
 }
 
 const STROKE_INSET = 1
@@ -35,6 +49,8 @@ export default function NeonSelectButton({
   children,
   className = '',
   layout = 'row',
+  animateStroke = false,
+  ...rest
 }) {
   const a = ACCENTS[accent] ?? ACCENTS.cyan
   const lightMotion = useLightMotion()
@@ -72,7 +88,7 @@ export default function NeonSelectButton({
     e.preventDefault()
     e.stopPropagation()
     onClick()
-    if (!lightMotion) {
+    if (!lightMotion || animateStroke) {
       measure()
       setStrokeKey((k) => k + 1)
     }
@@ -86,7 +102,8 @@ export default function NeonSelectButton({
     <button
       type="button"
       onClick={handleClick}
-      className={`relative w-full rounded-xl ${className}`}
+      className={`relative rounded-xl ${className || 'w-full'}`}
+      {...rest}
     >
       <span
         ref={cardRef}
@@ -96,12 +113,14 @@ export default function NeonSelectButton({
             : 'border-white/10 bg-bg-900/50 text-white/60 hover:border-white/20'
         }`}
       >
-        {!lightMotion && strokeKey > 0 && w > 0 && h > 0 && (
+        {(!lightMotion || animateStroke) && strokeKey > 0 && w > 0 && h > 0 && (
           <svg
             key={strokeKey}
             width={w}
             height={h}
-            className="neon-card-stroke pointer-events-none absolute left-0 top-0 z-10 overflow-visible"
+            className={`neon-card-stroke pointer-events-none absolute left-0 top-0 z-10 overflow-visible ${
+              animateStroke ? 'neon-card-stroke-force' : ''
+            }`}
             aria-hidden
           >
             <defs>

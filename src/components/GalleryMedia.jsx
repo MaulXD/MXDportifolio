@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getGallerySummary, getProjectCoverMedia } from '../lib/portfolioUtils'
 import { useLightMotion } from '../hooks/useLightMotion'
+import LoopVideo from './LoopVideo'
 
 /** Imagem inteira (contain), cantos arredondados, sem recorte do conteúdo. */
 const MEDIA_CLASS =
@@ -57,15 +58,7 @@ export default function GalleryMedia({
   const isVideo = current?.tipoMedia === 'Vídeo'
 
   const mediaEl = isVideo ? (
-    <video
-      key={current.mediaUrl}
-      src={current.mediaUrl}
-      autoPlay
-      loop
-      muted
-      playsInline
-      className={MEDIA_CLASS}
-    />
+    <LoopVideo key={current.mediaUrl} src={current.mediaUrl} className={MEDIA_CLASS} />
   ) : (
     <img
       key={current.mediaUrl}

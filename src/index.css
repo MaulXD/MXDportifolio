@@ -68,6 +68,22 @@
     animation: neon-card-stroke 1.15s ease-out forwards;
   }
 
+  /* Vídeo sem UI do player (estilo GIF) */
+  .video-gif {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .video-gif::-webkit-media-controls,
+  .video-gif::-webkit-media-controls-enclosure,
+  .video-gif::-webkit-media-controls-panel,
+  .video-gif::-webkit-media-controls-start-playback-button {
+    display: none !important;
+    -webkit-appearance: none;
+    opacity: 0;
+    pointer-events: none;
+  }
+
   @keyframes neon-card-stroke {
     0% {
       stroke-dashoffset: 1;
@@ -84,7 +100,14 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce), (max-width: 768px) {
+@media (max-width: 768px) {
+  .neon-card-stroke:not(.neon-card-stroke-force) rect {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
   .neon-card-stroke rect {
     animation: none;
     opacity: 0;

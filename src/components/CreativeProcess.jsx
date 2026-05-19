@@ -1,17 +1,6 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import {
-  Lightbulb,
-  Layers,
-  Briefcase,
-  Sparkles,
-  Search,
-  PenTool,
-  Clapperboard,
-  Globe,
-  MessageCircle,
-  RefreshCw,
-} from 'lucide-react'
+import { Lightbulb, Layers, Briefcase, Sparkles } from 'lucide-react'
 import { useLightMotion } from '../hooks/useLightMotion'
 
 const DOT_COLORS = {
@@ -21,80 +10,48 @@ const DOT_COLORS = {
   'neon-amber': '#F59E0B',
 }
 
+/** Resumo curto por card — sem listas longas para leitura rápida no mobile */
 const PILLARS = [
   {
     id: 'processo',
     icon: Lightbulb,
-    title: 'Processo Criativo',
-    summary:
-      'Cada projeto começa com clareza. Entendo o briefing, defino a direção visual e só então parto para a produção, com revisões até a entrega final.',
+    title: 'Processo',
+    summary: 'Briefing → conceito → produção → revisão e entrega.',
     dotColor: DOT_COLORS['neon-green'],
     iconClass: 'text-neon-green',
-    border: 'border-neon-green/20',
     hoverBorder: 'hover:shadow-[inset_0_0_0_1px_rgba(0,255,157,0.4)]',
     bg: 'from-neon-green/10',
-    items: [
-      { icon: MessageCircle, text: 'Briefing e alinhamento de objetivos com o cliente' },
-      { icon: Search, text: 'Pesquisa, referências e definição do conceito' },
-      { icon: PenTool, text: 'Produção: layout, motion, assets ou código' },
-      { icon: RefreshCw, text: 'Revisão, ajustes e entrega dos arquivos finais' },
-    ],
   },
   {
     id: 'areas',
     icon: Layers,
-    title: 'Áreas de atuação',
-    summary:
-      'Atuo em quatro frentes que se complementam. Posso entregar uma peça isolada ou um pacote completo, do logo ao site.',
+    title: 'Áreas',
+    summary: 'Branding, motion, web e stream — peça avulsa ou pacote completo.',
     dotColor: DOT_COLORS['neon-cyan'],
     iconClass: 'text-neon-cyan',
-    border: 'border-neon-cyan/20',
     hoverBorder: 'hover:shadow-[inset_0_0_0_1px_rgba(14,165,233,0.4)]',
     bg: 'from-neon-cyan/10',
-    items: [
-      { icon: PenTool, text: 'Branding, logotipos e identidade visual' },
-      { icon: Clapperboard, text: 'Motion design, vídeo e peças para redes' },
-      { icon: Globe, text: 'Sites, landing pages e interfaces web' },
-      { icon: Sparkles, text: 'Stream packs, banners e materiais promocionais' },
-    ],
   },
   {
     id: 'experiencia',
     icon: Briefcase,
-    title: 'Experiência & rotina',
+    title: 'Experiência',
     summary:
-      'Mais de nove anos em design desde 2017. Front-end na VF Datamining (2019–2020). Hoje combino criação no IDHES com gestão administrativa desde 2021.',
+      '9+ anos em design (desde 2017) · front-end VF 2019–20 · gestão desde 2021 · IDHES hoje.',
     dotColor: DOT_COLORS['neon-violet'],
     iconClass: 'text-neon-violet',
-    border: 'border-neon-violet/20',
     hoverBorder: 'hover:shadow-[inset_0_0_0_1px_rgba(139,92,246,0.4)]',
     bg: 'from-neon-violet/10',
-    items: [
-      { text: 'Front-end na VF Datamining (ago. 2019 – dez. 2020)' },
-      { text: '9+ anos em design gráfico e motion (desde 2017)' },
-      { text: '5+ anos em gestão e organização (desde mar. 2021)' },
-      { text: 'Experiência com marcas, instituições e projetos autorais' },
-      { text: 'Hábito de documentar etapas e manter o cliente informado' },
-      { text: 'Adaptação a fluxos ágeis, do rascunho ao arquivo final' },
-    ],
   },
   {
     id: 'projetos',
     icon: Sparkles,
-    title: 'Projetos criativos',
-    summary:
-      'Trato cada entrega como parte de um portfólio vivo. Busco peças com personalidade, seja uma thumb, uma vinheta ou uma página inteira.',
+    title: 'Projetos',
+    summary: 'Do thumb à página inteira — peças com personalidade e consistência de marca.',
     dotColor: DOT_COLORS['neon-amber'],
     iconClass: 'text-neon-amber',
-    border: 'border-neon-amber/20',
     hoverBorder: 'hover:shadow-[inset_0_0_0_1px_rgba(245,158,11,0.4)]',
     bg: 'from-neon-amber/10',
-    items: [
-      { text: 'Portfólio em constante atualização no site' },
-      { text: 'Do conceito único ao pacote completo de mídias' },
-      { text: 'Abertura a demandas pontuais ou parcerias contínuas' },
-      { text: 'Foco em resultado visual e consistência de marca' },
-    ],
   },
 ]
 
@@ -109,7 +66,7 @@ export default function CreativeProcess() {
 
   return (
     <section id="como-trabalho" className="relative border-t border-white/5 py-20 sm:py-28">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-neon-green/[0.02] via-transparent to-transparent" />
+      <motion.div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-neon-green/[0.02] via-transparent to-transparent" aria-hidden />
 
       <motion.div
         ref={ref}
@@ -122,12 +79,8 @@ export default function CreativeProcess() {
         <h2 className="section-heading">
           No <span className="text-neon">detalhe</span>
         </h2>
-        <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/50">
-          Processo, áreas, experiência e visão de projeto em um panorama direto de como é
-          trabalhar comigo.
-        </p>
 
-        <div className="mt-8 flex flex-col gap-3 sm:gap-4">
+        <motion.div className="mt-6 flex flex-col gap-2.5 sm:gap-3">
           {PILLARS.map((pillar, i) => {
             const Icon = pillar.icon
 
@@ -142,58 +95,31 @@ export default function CreativeProcess() {
                   duration: lightMotion ? 0.2 : 0.45,
                   delay: lightMotion ? 0 : 0.08 + i * 0.06,
                 }}
-                className={`group relative overflow-hidden rounded-lg border border-white/5 bg-bg-800/50 p-4 sm:p-5 ${HOVER_OUT} ${HOVER_IN} ${pillar.hoverBorder}`}
+                className={`group relative overflow-hidden rounded-lg border border-white/5 bg-bg-800/50 p-3.5 sm:p-4 ${HOVER_OUT} ${HOVER_IN} ${pillar.hoverBorder}`}
               >
                 <div
                   className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${pillar.bg} to-transparent opacity-0 group-hover:opacity-100 ${HOVER_OUT} group-hover:[transition:opacity_0.2s_ease-out]`}
                 />
 
-                <div className="relative z-10">
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/10 bg-bg-700/80 ${pillar.iconClass}`}
-                    >
-                      <Icon size={15} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-display text-sm font-bold leading-snug text-white sm:text-base">
-                        {pillar.title}
-                      </h3>
-                      <p className="mt-1 text-[11px] leading-relaxed text-white/50 sm:text-xs">
-                        {pillar.summary}
-                      </p>
-                    </div>
+                <div className="relative z-10 flex items-start gap-3">
+                  <div
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/10 bg-bg-700/80 ${pillar.iconClass}`}
+                  >
+                    <Icon size={15} />
                   </div>
-
-                  <ul className="mt-2.5 space-y-1 border-t border-white/5 pt-2.5">
-                    {pillar.items.map((item) => {
-                      const ItemIcon = item.icon
-                      return (
-                        <li
-                          key={item.text}
-                          className="flex items-start gap-2 text-[11px] leading-relaxed text-white/55 sm:text-xs"
-                        >
-                          {ItemIcon ? (
-                            <ItemIcon
-                              size={12}
-                              className={`mt-0.5 shrink-0 ${pillar.iconClass}`}
-                            />
-                          ) : (
-                            <span
-                              className="mt-1.5 h-1 w-1 shrink-0 rounded-full"
-                              style={{ backgroundColor: pillar.dotColor }}
-                            />
-                          )}
-                          <span>{item.text}</span>
-                        </li>
-                      )
-                    })}
-                  </ul>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-display text-sm font-bold text-white sm:text-base">
+                      {pillar.title}
+                    </h3>
+                    <p className="mt-0.5 text-[11px] leading-snug text-white/50 sm:text-xs">
+                      {pillar.summary}
+                    </p>
+                  </div>
                 </div>
               </motion.article>
             )
           })}
-        </div>
+        </motion.div>
       </motion.div>
     </section>
   )

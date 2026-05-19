@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { Mail, Phone, Send } from 'lucide-react'
+import { Mail, Phone } from 'lucide-react'
 import WhatsAppIcon from './icons/WhatsAppIcon'
 
 const CHANNELS = [
@@ -62,7 +62,7 @@ export default function Contact() {
           Vamos <span className="text-neon">criar juntos</span>
         </h2>
         <p className="mt-4 max-w-xl text-white/50">
-          Tem um projeto em mente? Entre em contato — respondo o mais rápido possível.
+          Tem um projeto em mente? Entre em contato. Respondo o mais rápido possível.
         </p>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -99,41 +99,13 @@ export default function Contact() {
             )
           })}
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 0.5 }}
-          className="mt-10 flex flex-wrap gap-4"
-        >
-          <motion.a
-            href="https://wa.me/5582993554322"
-            target="_blank"
-            rel="noopener noreferrer"
-            whileHover={{ scale: 1.03, boxShadow: '0 0 32px rgba(0,255,157,0.35)' }}
-            whileTap={{ scale: 0.97 }}
-            className="flex items-center gap-2 rounded-xl bg-neon-green px-6 py-3.5 text-sm font-semibold text-bg-950"
-          >
-            <WhatsAppIcon size={18} className="text-bg-950" />
-            WhatsApp
-          </motion.a>
-          <motion.a
-            href="mailto:contato@raulxd.eu"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="glass-hover flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-medium text-white"
-          >
-            <Send size={18} />
-            Enviar E-mail
-          </motion.a>
-        </motion.div>
       </motion.div>
 
       <footer className="mt-20 border-t border-white/5 py-8">
         <div className="mx-auto flex max-w-6xl items-center justify-center gap-3 px-4 sm:px-6 lg:px-8">
           <img src="/favicon-mxd.png" alt="Raul Luz" className="h-8 w-8 rounded-full object-cover opacity-90" />
           <p className="text-sm text-white/40">
-            © 2026 Raul Luz — Designer Gráfico & Motion Designer
+            © 2026 Raul Luz · Designer Gráfico & Motion Designer
           </p>
         </div>
       </footer>

@@ -135,7 +135,7 @@ export default function Portfolio() {
                     className="block w-full text-left"
                     aria-label={`Abrir projeto ${project.title}`}
                   >
-                    <div className="relative aspect-[4/3] overflow-hidden bg-bg-700/50">
+                    <div className="relative aspect-[4/3] overflow-hidden rounded-t-2xl bg-bg-900/60">
                       <GalleryMedia
                         galeria={project.galeria}
                         title={project.title}
@@ -157,7 +157,7 @@ export default function Portfolio() {
                         <span
                           className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${styles.badge}`}
                         >
-                          {project.category ?? '—'}
+                          {project.category ?? 'Outros'}
                         </span>
                       </div>
                       <h3 className="font-display text-base font-bold text-white">

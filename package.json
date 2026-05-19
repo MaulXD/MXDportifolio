@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "studio": "sanity dev"
+    "studio": "sanity dev",
+    "cors:prod": "sanity cors add https://raulxd.eu --no-credentials && sanity cors add https://www.raulxd.eu --no-credentials",
+    "cors:list": "sanity cors list"
   },
   "dependencies": {
     "@sanity/client": "^7.22.0",

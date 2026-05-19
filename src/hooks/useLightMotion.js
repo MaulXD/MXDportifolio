@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-/** Mobile ou preferência do sistema — animações mais leves (menos flicker) */
+/** Mobile ou preferência do sistema: animações mais leves (menos flicker) */
 export function useLightMotion() {
   const [light, setLight] = useState(() => {
     if (typeof window === 'undefined') return false

@@ -5,22 +5,22 @@ import { Briefcase, GraduationCap } from 'lucide-react'
 const EXPERIENCES = [
   {
     role: 'Designer Gráfico',
-    company: 'IDHES — Instituto de Desenvolvimento de Habilidades Educacionais e Sociais',
-    period: 'Set. 2025 — presente',
+    company: 'IDHES, Instituto de Desenvolvimento de Habilidades Educacionais e Sociais',
+    period: 'Set. 2025 até o presente',
     status: 'Atual',
     active: true,
   },
   {
     role: 'Supervisor Administrativo',
-    company: 'Sarmento Camargo & Sarmento — Advocacia e Consultoria',
-    period: 'Mar. 2021 — presente',
+    company: 'Sarmento Camargo & Sarmento, Advocacia e Consultoria',
+    period: 'Mar. 2021 até o presente',
     status: 'Atual',
     active: true,
   },
   {
     role: 'Programador Front-End',
     company: 'VF Datamining',
-    period: 'Ago. 2019 — Dez. 2020',
+    period: 'Ago. 2019 a Dez. 2020',
     status: 'Concluído',
     active: false,
   },

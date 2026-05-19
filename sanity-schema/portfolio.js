@@ -1,9 +1,11 @@
 import { PORTFOLIO_CATEGORY_OPTIONS } from '../src/lib/portfolioCategories.js'
+import GaleriaInput from './components/GaleriaInput.jsx'
 
 /**
  * Schema do documento "portfolio" para o Sanity Studio.
  */
-export default {  name: 'portfolio',
+export default {
+  name: 'portfolio',
   title: 'Portfólio',
   type: 'document',
   fields: [
@@ -54,63 +56,38 @@ export default {  name: 'portfolio',
       validation: (Rule) => Rule.required(),
     },
     {
+      name: 'descricao',
+      title: 'Descrição do projeto',
+      type: 'text',
+      rows: 4,
+      description:
+        'Texto geral sobre o projeto (contexto, cliente, objetivo). Aparece no modal ao abrir o projeto no site.',
+    },
+    {
       name: 'galeria',
       title: 'Galeria do Projeto',
       type: 'array',
-      description: 'Adicione várias mídias (.webm, .png, .webp). A primeira aparece como capa no grid.',
-      of: [
-        {
-          type: 'object',
-          name: 'galeriaItem',
-          title: 'Mídia',
-          fields: [
-            {
-              name: 'legenda',
-              title: 'Legenda',
-              type: 'string',
-              description:
-                'Nome exibido no site para esta mídia (ex.: Capa, Versão final, Thumbnail 02). Deixe em branco para usar o número da mídia.',
-            },
-            {
-              name: 'tipoMedia',
-              title: 'Tipo de Mídia',
-              type: 'string',
-              options: {
-                list: [
-                  { title: 'Imagem', value: 'Imagem' },
-                  { title: 'Vídeo', value: 'Vídeo' },
-                ],
-                layout: 'radio',
-              },
-              validation: (Rule) => Rule.required(),
-            },
-            {
-              name: 'asset',
-              title: 'Arquivo',
-              type: 'file',
-              description: 'Formatos aceitos: .webm (vídeo), .png e .webp (imagem).',
-              options: {
-                accept: 'video/webm,.webm,image/png,.png,image/webp,.webp',
-              },
-              validation: (Rule) => Rule.required(),
-            },
-          ],
-          preview: {
-            select: {
-              legenda: 'legenda',
-              tipoMedia: 'tipoMedia',
-              filename: 'asset.asset.originalFilename',
-            },
-            prepare({ legenda, tipoMedia, filename }) {
-              return {
-                title: legenda?.trim() || tipoMedia || 'Mídia',
-                subtitle: [tipoMedia, filename].filter(Boolean).join(' · ') || 'Sem arquivo',
-              }
-            },
-          },
-        },
-      ],
-      validation: (Rule) => Rule.min(1).error('Adicione pelo menos uma mídia à galeria.'),
+      description:
+        'Organize em pastas (Telas, Painéis, Transições…). Arraste arquivos na pasta desejada. A primeira mídia da primeira pasta vira capa no site.',
+      of: [{ type: 'galeriaPasta' }],
+      components: {
+        input: GaleriaInput,
+      },
+      validation: (Rule) =>
+        Rule.custom((pastas) => {
+          if (!Array.isArray(pastas) || pastas.length === 0) {
+            return 'Crie pelo menos uma pasta com mídia.'
+          }
+          const total = pastas.reduce((n, pasta) => n + (pasta?.itens?.length ?? 0), 0)
+          if (total < 1) return 'Adicione pelo menos uma mídia em alguma pasta.'
+          const missing = pastas.some((pasta) =>
+            (pasta?.itens ?? []).some(
+              (item) => !item?.asset?.asset?._ref && !item?.asset?._ref,
+            ),
+          )
+          if (missing) return 'Cada arquivo precisa estar enviado.'
+          return true
+        }),
     },
     {
       name: 'externalLink',
@@ -123,12 +100,16 @@ export default {  name: 'portfolio',
     select: {
       title: 'title',
       subtitle: 'category',
-      count: 'galeria.length',
+      pastas: 'galeria',
     },
-    prepare({ title, subtitle, count }) {
+    prepare({ title, subtitle, pastas }) {
+      const count = Array.isArray(pastas)
+        ? pastas.reduce((n, p) => n + (p?.itens?.length ?? 0), 0)
+        : 0
+      const folderCount = Array.isArray(pastas) ? pastas.length : 0
       return {
         title,
-        subtitle: `${subtitle} · ${count ?? 0} mídia(s)`,
+        subtitle: `${subtitle} · ${count} mídia(s) em ${folderCount} pasta(s)`,
       }
     },
   },

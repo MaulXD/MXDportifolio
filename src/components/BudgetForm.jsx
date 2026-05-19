@@ -39,7 +39,7 @@ const SERVICE_OPTIONS = [
 const STREAM_PACK_LABEL = 'Stream pack'
 const SITE_LABEL = 'Site / Landing page'
 
-/** Subitens de Stream pack — comum em briefings de streamers (Twitch/YouTube) */
+/** Subitens de Stream pack, comuns em briefings de streamers (Twitch/YouTube) */
 const STREAM_PACK_ITEMS = [
   'Overlay animado (gameplay + webcam)',
   'Telas: início, pausa e “volto já”',
@@ -319,7 +319,7 @@ export default function BudgetForm() {
         </h2>
         <p className="mt-4 text-white/50">
           Preencha seus dados, escolha o que você precisa e clique em enviar. Vamos abrir o WhatsApp
-          com sua mensagem pronta — é só conferir e mandar.
+          com sua mensagem pronta. É só conferir e mandar.
         </p>
 
         <motion.form
@@ -432,7 +432,7 @@ export default function BudgetForm() {
                 selected={selectedServices}
                 onToggle={toggleService}
                 error={submitAttempted ? errors.selectedServices : ''}
-                hint="Marque um ou mais serviços — combine motion, stream, site e redes no mesmo orçamento."
+                hint="Marque um ou mais serviços e combine motion, stream, site e redes no mesmo orçamento."
                 className="mt-3"
               />
             </div>
@@ -486,7 +486,7 @@ export default function BudgetForm() {
                       if (errors.streamItems) setErrors((p) => ({ ...p, streamItems: undefined }))
                     }}
                     error={submitAttempted ? errors.streamItems : ''}
-                    hint="Marque tudo que precisa — overlay, telas, alertas e painéis no mesmo briefing."
+                    hint="Marque tudo que precisa: overlay, telas, alertas e painéis no mesmo briefing."
                     className="mt-3"
                   />
                 </motion.div>

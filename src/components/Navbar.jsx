@@ -6,6 +6,7 @@ import { Menu, X } from 'lucide-react'
 const NAV_LINKS = [
   { label: 'Início', href: '#hero' },
   { label: 'Sobre', href: '#about' },
+  { label: 'Como trabalho', href: '#como-trabalho' },
   { label: 'Habilidades', href: '#skills' },
   { label: 'Experiência', href: '#experience' },
   { label: 'Portfólio', href: '#portfolio' },

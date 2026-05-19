@@ -54,22 +54,93 @@ export const accentMap = {
   },
 }
 
+function inferTipoMedia(item) {
+  if (item?.tipoMedia === 'Vídeo' || item?.tipoMedia === 'Imagem') return item.tipoMedia
+  const mime = item?.mimeType || ''
+  const url = item?.mediaUrl || ''
+  const name = item?.filename || ''
+  if (mime.startsWith('video/') || /\.webm$/i.test(url) || /\.webm$/i.test(name)) return 'Vídeo'
+  return 'Imagem'
+}
+
+function inferLegenda(item) {
+  const manual = typeof item?.legenda === 'string' ? item.legenda.trim() : ''
+  if (manual) return manual
+  const name = item?.filename || ''
+  if (!name) return ''
+  return name
+    .replace(/\.[^.]+$/, '')
+    .replace(/[-_]+/g, ' ')
+    .trim()
+}
+
+function mapGaleriaItem(item, pasta = 'Geral', exibirPasta = true) {
+  if (!item || typeof item.mediaUrl !== 'string' || !item.mediaUrl.length) return null
+  return {
+    pasta: pasta.trim() || 'Geral',
+    exibirPasta: exibirPasta !== false,
+    tipoMedia: inferTipoMedia(item),
+    mediaUrl: item.mediaUrl,
+    legenda: inferLegenda(item),
+  }
+}
+
+/** Pastas (novo) ou lista plana legada vindas do Sanity. */
+export function flattenGaleriaEntries(entries) {
+  if (!Array.isArray(entries) || entries.length === 0) return []
+
+  const first = entries[0]
+  const isFolderShape =
+    first?._type === 'galeriaPasta' ||
+    (typeof first?.nome === 'string' && Array.isArray(first?.itens))
+
+  if (isFolderShape) {
+    return entries.flatMap((folder) => {
+      const pasta = (folder.nome || 'Geral').trim() || 'Geral'
+      const exibirPasta = folder.exibirNoSite !== false
+      return (folder.itens || [])
+        .map((item) => mapGaleriaItem(item, pasta, exibirPasta))
+        .filter(Boolean)
+    })
+  }
+
+  return entries
+    .map((item) => mapGaleriaItem(item, item.pasta || 'Geral', item.exibirPasta !== false))
+    .filter(Boolean)
+}
+
+/** Mídias de pastas marcadas para exibição no site. */
+export function getVisibleGaleria(galeria) {
+  return (Array.isArray(galeria) ? galeria : []).filter(
+    (item) => item?.mediaUrl && item.exibirPasta !== false,
+  )
+}
+
+export function getGaleriaPastas(galeria) {
+  const list = getVisibleGaleria(galeria)
+  const seen = new Set()
+  const pastas = []
+  for (const item of list) {
+    const pasta = item?.pasta?.trim() || 'Geral'
+    if (!seen.has(pasta)) {
+      seen.add(pasta)
+      pastas.push(pasta)
+    }
+  }
+  return pastas
+}
+
 export function normalizeProject(raw) {
   if (!raw || typeof raw !== 'object') return null
 
-  const fromGaleria = (Array.isArray(raw.galeria) ? raw.galeria : [])
-    .filter((item) => item && typeof item.mediaUrl === 'string' && item.mediaUrl.length > 0)
-    .map((item) => ({
-      tipoMedia: item?.tipoMedia === 'Vídeo' ? 'Vídeo' : 'Imagem',
-      mediaUrl: item.mediaUrl,
-      legenda: typeof item?.legenda === 'string' ? item.legenda.trim() : '',
-    }))
-
-  let galeria = fromGaleria
+  const entries = raw.galeriaEntries ?? raw.galeria ?? []
+  let galeria = flattenGaleriaEntries(entries)
 
   if (galeria.length === 0 && raw.legacyMediaUrl) {
     galeria = [
       {
+        pasta: 'Geral',
+        exibirPasta: true,
         tipoMedia: raw.legacyMediaType === 'Vídeo' ? 'Vídeo' : 'Imagem',
         mediaUrl: raw.legacyMediaUrl,
         legenda: '',
@@ -85,6 +156,7 @@ export function normalizeProject(raw) {
     slug,
     category: normalizeCategory(raw.category),
     externalLink: raw.externalLink ?? null,
+    descricao: typeof raw.descricao === 'string' ? raw.descricao.trim() : '',
     galeria,
   }
 }
@@ -97,13 +169,15 @@ export function getMediaLabel(item, index = 0) {
 
 export function getGallerySummary(galeria) {
   const list = Array.isArray(galeria) ? galeria : []
-  const valid = list.filter((item) => item?.mediaUrl)
+  const valid = getVisibleGaleria(list)
+  const pastas = getGaleriaPastas(list)
   const videos = valid.filter((item) => item?.tipoMedia === 'Vídeo').length
   const images = valid.filter((item) => item?.tipoMedia === 'Imagem').length
   const parts = []
+  if (pastas.length > 1) parts.push(`${pastas.length} pastas`)
   if (videos) parts.push(`${videos} vídeo${videos > 1 ? 's' : ''}`)
-  if (images) parts.push(`${images} imagem${images > 1 ? 'ns' : ''}`)
-  return { valid, label: parts.length ? parts.join(' · ') : 'Sem mídia' }
+  if (images) parts.push(`${images} ${images > 1 ? 'imagens' : 'imagem'}`)
+  return { valid, pastas, label: parts.length ? parts.join(' · ') : 'Sem mídia' }
 }
 
 export function getProjectPath(project) {

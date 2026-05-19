@@ -96,7 +96,7 @@ export default function Hero() {
             variants={ITEM}
             className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-white/45 sm:text-base"
           >
-            Crio experiências visuais que unem design, movimento e código — da identidade de marca
+            Crio experiências visuais que unem design, movimento e código, da identidade de marca
             ao pixel perfeito na tela.
           </motion.p>
 

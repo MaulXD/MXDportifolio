@@ -1,27 +1,93 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Film, Image as ImageIcon } from 'lucide-react'
-import { getMediaLabel } from '../lib/portfolioUtils'
+import { ChevronLeft, ChevronRight, Film, Image as ImageIcon } from 'lucide-react'
+import { getGaleriaPastas, getMediaLabel } from '../lib/portfolioUtils'
 import { useLightMotion } from '../hooks/useLightMotion'
 
-export default function ProjectGallery({ items, title, accentClass = 'border-neon-green/30' }) {
+function ThumbButton({ item, index, active, onSelect }) {
+  const isVideo = item.tipoMedia === 'Vídeo'
+  const label = getMediaLabel(item, index)
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-label={`Ver ${label}`}
+      aria-current={active ? 'true' : undefined}
+      title={label}
+      className={`group relative flex-shrink-0 overflow-hidden rounded-xl border transition-all ${
+        active
+          ? 'border-neon-green/70 ring-2 ring-neon-green/30'
+          : 'border-white/10 opacity-70 hover:border-white/25 hover:opacity-100'
+      }`}
+      style={{ width: 88, height: 56 }}
+    >
+      {isVideo ? (
+        <video
+          src={item.mediaUrl}
+          muted
+          playsInline
+          className="h-full w-full rounded-xl object-contain bg-bg-950"
+        />
+      ) : (
+        <img
+          src={item.mediaUrl}
+          alt=""
+          loading="lazy"
+          className="h-full w-full rounded-xl object-contain bg-bg-950"
+        />
+      )}
+      <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg-950/95 to-transparent px-1.5 pb-1 pt-4 text-left text-[9px] font-medium leading-tight text-white/90 line-clamp-1">
+        {label}
+      </span>
+      <span className="absolute right-1 top-1 rounded bg-bg-950/90 p-0.5 text-white/70">
+        {isVideo ? <Film size={10} /> : <ImageIcon size={10} />}
+      </span>
+    </button>
+  )
+}
+
+export default function ProjectGallery({
+  items,
+  title,
+  accentClass = 'border-neon-green/30',
+  compact = false,
+}) {
+  const pastas = useMemo(() => getGaleriaPastas(items), [items])
+  const showPastas = pastas.length > 1
+  const [activePasta, setActivePasta] = useState(pastas[0] ?? 'Geral')
   const [activeIndex, setActiveIndex] = useState(0)
   const lightMotion = useLightMotion()
-  const current = items[activeIndex] ?? null
+  const stripRef = useRef(null)
+
+  const filteredItems = showPastas
+    ? items.filter((item) => (item.pasta || 'Geral') === activePasta)
+    : items
+
+  const current = filteredItems[activeIndex] ?? null
+  const count = filteredItems.length
+
+  useEffect(() => {
+    setActivePasta(pastas[0] ?? 'Geral')
+    setActiveIndex(0)
+  }, [items, pastas])
 
   useEffect(() => {
     setActiveIndex(0)
-  }, [items])
+  }, [activePasta])
 
-  if (!items.length) {
+  const goPrev = () => setActiveIndex((i) => (i <= 0 ? count - 1 : i - 1))
+  const goNext = () => setActiveIndex((i) => (i >= count - 1 ? 0 : i + 1))
+
+  if (!count || !current) {
     return (
-      <div className="flex aspect-[4/3] max-h-72 items-center justify-center rounded-xl border border-white/10 bg-bg-800/60">
+      <div className="flex min-h-[200px] w-full items-center justify-center rounded-xl border border-white/10 bg-bg-800/40">
         <img src="/mxd-logo.png" alt="" className="h-14 w-14 rounded-full opacity-30" aria-hidden />
       </div>
     )
   }
 
-  const isVideo = current?.tipoMedia === 'Vídeo'
+  const isVideo = current.tipoMedia === 'Vídeo'
   const currentLabel = getMediaLabel(current, activeIndex)
 
   const mainMedia = isVideo ? (
@@ -33,103 +99,145 @@ export default function ProjectGallery({ items, title, accentClass = 'border-neo
       muted
       playsInline
       controls
-      className="max-h-full max-w-full rounded-lg object-contain"
+      className={`w-auto max-w-full rounded-2xl object-contain ${
+        compact ? 'max-h-[min(32vh,280px)]' : 'max-h-[min(50vh,420px)]'
+      }`}
     />
   ) : (
     <img
       key={current.mediaUrl}
       src={current.mediaUrl}
-      alt={title ? `${title} — ${currentLabel}` : currentLabel}
-      className="max-h-full max-w-full rounded-lg object-contain"
+      alt={title ? `${title}: ${currentLabel}` : currentLabel}
+      className={`w-auto max-w-full rounded-2xl object-contain ${
+        compact ? 'max-h-[min(32vh,280px)]' : 'max-h-[min(50vh,420px)]'
+      }`}
     />
   )
 
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-5">
-      <div className="order-2 lg:order-1 lg:w-[120px] lg:flex-shrink-0">
-        <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-white/40 lg:sr-only">
-          Galeria
-        </p>
-        <div className="flex gap-3 overflow-x-auto pb-1 lg:flex-col lg:overflow-x-visible lg:overflow-y-auto lg:pb-0 lg:pr-1 lg:max-h-[min(46vh,400px)]">
-          {items.map((item, i) => {
-            const active = i === activeIndex
-            const thumbVideo = item.tipoMedia === 'Vídeo'
-            const thumbLabel = getMediaLabel(item, i)
+    <div className={`flex w-full flex-col ${compact ? 'gap-3' : 'gap-4'}`}>
+      {showPastas && (
+        <div
+          className="flex gap-2 overflow-x-auto pb-1"
+          role="tablist"
+          aria-label="Pastas da galeria"
+        >
+          {pastas.map((pasta) => {
+            const pastaCount = items.filter((it) => (it.pasta || 'Geral') === pasta).length
+            const selected = pasta === activePasta
             return (
-              <div key={`${item.mediaUrl}-${i}`} className="flex w-20 flex-shrink-0 flex-col gap-1 sm:w-[88px] lg:w-full">
-                <button
-                  type="button"
-                  onClick={() => setActiveIndex(i)}
-                  aria-label={`Ver ${thumbLabel}`}
-                  aria-current={active ? 'true' : undefined}
-                  className={`relative aspect-video overflow-hidden rounded-lg border transition-colors lg:aspect-[4/3] ${
-                    active
-                      ? 'border-neon-green/60 ring-2 ring-neon-green/25'
-                      : 'border-white/10 opacity-75 hover:border-white/30 hover:opacity-100'
+              <button
+                key={pasta}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                onClick={() => setActivePasta(pasta)}
+                className={`flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-left transition-colors ${
+                  selected
+                    ? 'border-neon-green/40 bg-neon-green/10 text-white'
+                    : 'border-white/10 bg-bg-800/50 text-white/55 hover:border-white/20 hover:text-white/80'
+                }`}
+              >
+                <span className="text-xs font-semibold sm:text-sm">{pasta}</span>
+                <span
+                  className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                    selected ? 'bg-neon-green/20 text-neon-green' : 'bg-white/5 text-white/40'
                   }`}
                 >
-                  {thumbVideo ? (
-                    <video
-                      src={item.mediaUrl}
-                      muted
-                      playsInline
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <img
-                      src={item.mediaUrl}
-                      alt=""
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  )}
-                  <span className="absolute bottom-1 right-1 rounded bg-bg-950/85 p-0.5 text-white/70">
-                    {thumbVideo ? <Film size={10} /> : <ImageIcon size={10} />}
-                  </span>
-                </button>
-                <p
-                  className={`line-clamp-2 text-center text-[10px] leading-tight lg:text-left ${
-                    active ? 'text-neon-green/90' : 'text-white/45'
-                  }`}
-                  title={thumbLabel}
-                >
-                  {thumbLabel}
-                </p>
-              </div>
+                  {pastaCount}
+                </span>
+              </button>
             )
           })}
         </div>
-      </div>
+      )}
 
       <div
-        className={`order-1 lg:order-2 relative mx-auto w-full max-w-2xl flex-1 overflow-hidden rounded-xl border bg-bg-800/60 lg:mx-0 ${accentClass}`}
+        className={`relative overflow-hidden rounded-xl border bg-bg-950/80 ${accentClass}`}
       >
-        <div className="relative flex aspect-[4/3] max-h-[min(42vh,360px)] items-center justify-center bg-bg-900/50 sm:max-h-[min(46vh,400px)]">
+        <div
+          className={`relative flex items-center justify-center bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.04)_0%,_transparent_70%)] ${
+            compact
+              ? 'min-h-[140px] px-3 py-4 sm:px-5 sm:py-5'
+              : 'min-h-[200px] px-4 py-6 sm:px-8 sm:py-8'
+          }`}
+        >
+          {count > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={goPrev}
+                className="absolute left-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-bg-900/90 text-white/80 backdrop-blur-sm transition-colors hover:border-white/25 hover:text-white sm:left-3"
+                aria-label="Mídia anterior"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <button
+                type="button"
+                onClick={goNext}
+                className="absolute right-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-bg-900/90 text-white/80 backdrop-blur-sm transition-colors hover:border-white/25 hover:text-white sm:right-3"
+                aria-label="Próxima mídia"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </>
+          )}
+
           {lightMotion ? (
-            <div className="absolute inset-0 flex items-center justify-center p-2">{mainMedia}</div>
+            <div className="flex items-center justify-center">{mainMedia}</div>
           ) : (
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${current.mediaUrl}-${activeIndex}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.2 }}
-                className="absolute inset-0 flex items-center justify-center p-2"
+                className="flex items-center justify-center"
               >
                 {mainMedia}
               </motion.div>
             </AnimatePresence>
           )}
         </div>
-        <div className="border-t border-white/5 px-3 py-2.5 text-center">
-          <p className="text-sm font-medium text-white/90">{currentLabel}</p>
-          <p className="mt-0.5 text-[11px] text-white/40">
-            {activeIndex + 1} de {items.length}
-            {isVideo ? ' · Vídeo' : ' · Imagem'}
+
+        <div
+          className={`flex flex-wrap items-center justify-between gap-2 border-t border-white/10 bg-bg-900/60 ${
+            compact ? 'px-3 py-2' : 'px-4 py-3'
+          }`}
+        >
+          <p className="min-w-0 flex-1 truncate text-sm font-medium text-white">{currentLabel}</p>
+          <p className="shrink-0 text-xs text-white/45">
+            {activeIndex + 1} / {count}
+            {showPastas && <span className="text-white/25"> · </span>}
+            {showPastas && <span>{activePasta}</span>}
+            <span className="text-white/25"> · </span>
+            {isVideo ? 'Vídeo' : 'Imagem'}
           </p>
         </div>
       </div>
+
+      {count > 1 && (
+        <div>
+          <p className="mb-2 text-[10px] font-medium uppercase tracking-widest text-white/35">
+            Todas nesta pasta
+          </p>
+          <div
+            ref={stripRef}
+            className="flex gap-2 overflow-x-auto pb-1"
+          >
+            {filteredItems.map((item, i) => (
+              <ThumbButton
+                key={`${item.mediaUrl}-${i}`}
+                item={item}
+                index={i}
+                active={i === activeIndex}
+                onSelect={() => setActiveIndex(i)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

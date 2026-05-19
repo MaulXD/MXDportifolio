@@ -8,7 +8,7 @@ const CATEGORIES = [
     title: 'Design & Branding',
     iconClass: 'text-neon-pink',
     gradient: 'from-neon-pink/20 to-transparent',
-    border: 'group-hover:shadow-[inset_0_0_0_1px_rgba(255,0,102,0.4)]',
+    border: 'hover:shadow-[inset_0_0_0_1px_rgba(255,0,102,0.4)]',
     dot: 'bg-neon-pink',
     items: ['Adobe Illustrator', 'Adobe Photoshop', 'Adobe InDesign', 'CorelDRAW'],
   },
@@ -17,7 +17,7 @@ const CATEGORIES = [
     title: 'Audiovisual & Motion',
     iconClass: 'text-neon-violet',
     gradient: 'from-neon-violet/20 to-transparent',
-    border: 'group-hover:shadow-[inset_0_0_0_1px_rgba(139,92,246,0.4)]',
+    border: 'hover:shadow-[inset_0_0_0_1px_rgba(139,92,246,0.4)]',
     dot: 'bg-neon-violet',
     items: ['After Effects', 'Adobe Premiere'],
   },
@@ -26,7 +26,7 @@ const CATEGORIES = [
     title: 'Web / Front-End',
     iconClass: 'text-neon-green',
     gradient: 'from-neon-green/20 to-transparent',
-    border: 'group-hover:shadow-[inset_0_0_0_1px_rgba(0,255,157,0.4)]',
+    border: 'hover:shadow-[inset_0_0_0_1px_rgba(0,255,157,0.4)]',
     dot: 'bg-neon-green',
     items: ['HTML', 'CSS', 'JavaScript', 'React'],
   },
@@ -35,7 +35,7 @@ const CATEGORIES = [
     title: '3D / Tech',
     iconClass: 'text-neon-amber',
     gradient: 'from-neon-amber/20 to-transparent',
-    border: 'group-hover:shadow-[inset_0_0_0_1px_rgba(245,158,11,0.4)]',
+    border: 'hover:shadow-[inset_0_0_0_1px_rgba(245,158,11,0.4)]',
     dot: 'bg-neon-amber',
     items: ['Blender', 'QA Automático'],
   },
@@ -49,6 +49,11 @@ const CARD_VARIANTS = {
     transition: { duration: 0.6, delay: i * 0.1 },
   }),
 }
+
+/** Entra suave no hover; some na hora ao sair */
+const HOVER_IN =
+  'hover:-translate-y-1.5 hover:[transition:transform_0.2s_ease-out,box-shadow_0.2s_ease-out,opacity_0.2s_ease-out]'
+const HOVER_OUT = '[transition:transform_0s,box-shadow_0s,opacity_0s]'
 
 export default function Skills() {
   const ref = useRef(null)
@@ -70,7 +75,7 @@ export default function Skills() {
           Ferramentas & <span className="text-neon">expertise</span>
         </h2>
         <p className="mt-4 max-w-xl text-white/50">
-          Domínio técnico em quatro frentes criativas — do branding ao código.
+          Domínio técnico em quatro frentes criativas, do branding ao código.
         </p>
 
         <div className="mt-12 grid gap-5 sm:grid-cols-2">
@@ -81,18 +86,15 @@ export default function Skills() {
               variants={CARD_VARIANTS}
               initial="hidden"
               animate={inView ? 'visible' : 'hidden'}
-              whileHover={{ y: -6 }}
-              className={`group relative overflow-hidden rounded-2xl border border-white/5 bg-bg-800/50 p-6 transition-all duration-300 ${cat.border}`}
+              className={`group relative overflow-hidden rounded-2xl border border-white/5 bg-bg-800/50 p-6 ${HOVER_OUT} ${HOVER_IN} ${cat.border}`}
             >
-              <motion.div
-                className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 transition-opacity duration-500 group-hover:opacity-100`}
+              <div
+                className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 group-hover:opacity-100 ${HOVER_OUT} group-hover:[transition:opacity_0.2s_ease-out]`}
               />
 
-              <motion.div className="relative z-10">
+              <div className="relative z-10">
                 <div className="mb-4 flex items-center gap-3">
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-bg-700/80`}
-                  >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-bg-700/80">
                     <cat.icon size={20} className={cat.iconClass} />
                   </div>
                   <h3 className="font-display text-lg font-bold text-white">{cat.title}</h3>
@@ -106,7 +108,7 @@ export default function Skills() {
                     </li>
                   ))}
                 </ul>
-              </motion.div>
+              </div>
             </motion.div>
           ))}
         </div>

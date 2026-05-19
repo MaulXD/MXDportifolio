@@ -1,5 +1,5 @@
 /** @type {import('sanity/cli').CliConfig} */
-export default {
+module.exports = {
   api: {
     projectId: 'isd92ph6',
     dataset: 'production',

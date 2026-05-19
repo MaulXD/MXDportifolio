@@ -22,12 +22,37 @@ const PORTFOLIO_FIELDS = `{
   title,
   "slug": slug.current,
   category,
+  descricao,
   "legacyMediaUrl": coalesce(mediaFile.asset->url, null),
   "legacyMediaType": coalesce(mediaType, "Imagem"),
-  "galeria": galeria[]{
+  "galeriaEntries": galeria[]{
+    _type,
+    nome,
+    exibirNoSite,
+    itens[]{
+      "legenda": coalesce(legenda, ""),
+      "tipoMedia": coalesce(
+        tipoMedia,
+        select(
+          coalesce(asset.asset->mimeType, asset->mimeType, "") match "video/*" => "Vídeo",
+          "Imagem"
+        )
+      ),
+      "mediaUrl": coalesce(asset.asset->url, asset->url),
+      "filename": coalesce(asset.asset.originalFilename, asset->originalFilename),
+      "mimeType": coalesce(asset.asset.mimeType, asset->mimeType)
+    },
     "legenda": coalesce(legenda, ""),
-    "tipoMedia": coalesce(tipoMedia, "Imagem"),
-    "mediaUrl": asset.asset->url
+    "tipoMedia": coalesce(
+      tipoMedia,
+      select(
+        coalesce(asset.asset->mimeType, asset->mimeType, "") match "video/*" => "Vídeo",
+        "Imagem"
+      )
+    ),
+    "mediaUrl": coalesce(asset.asset->url, asset->url),
+    "filename": coalesce(asset.asset.originalFilename, asset->originalFilename),
+    "mimeType": coalesce(asset.asset.mimeType, asset->mimeType)
   },
   externalLink
 }`

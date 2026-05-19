@@ -25,18 +25,20 @@ export default function GalleryMedia({ galeria, title, accent, className = '' })
 
   if (!current?.mediaUrl) {
     return (
-      <div className={`flex h-full items-center justify-center ${className}`}>
+      <motion.div className={`flex h-full items-center justify-center ${className}`}>
         <img
           src="/mxd-logo.png"
           alt=""
           className="h-16 w-16 rounded-full object-cover opacity-30"
           aria-hidden
         />
-      </div>
+      </motion.div>
     )
   }
 
   const isVideo = current?.tipoMedia === 'Vídeo'
+  const mediaClass =
+    'max-h-full max-w-full object-contain object-center drop-shadow-sm rounded-2xl'
 
   const mediaEl = isVideo ? (
     <video
@@ -46,22 +48,30 @@ export default function GalleryMedia({ galeria, title, accent, className = '' })
       loop
       muted
       playsInline
-      className="h-full w-full object-cover"
+      className={mediaClass}
     />
   ) : (
     <img
       key={current.mediaUrl}
       src={current.mediaUrl}
       alt={title ?? 'Projeto'}
-      className="h-full w-full object-cover"
+      className={mediaClass}
       loading="lazy"
     />
   )
 
+  const mediaFrame = (
+    <div className="flex h-full w-full items-center justify-center p-4 sm:p-5">
+      <div className="overflow-hidden rounded-2xl ring-1 ring-white/[0.06]">{mediaEl}</div>
+    </div>
+  )
+
   return (
-    <div className={`relative h-full w-full ${className}`}>
+    <motion.div
+      className={`relative h-full w-full bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.04)_0%,_transparent_72%)] ${className}`}
+    >
       {lightMotion ? (
-        <div className="absolute inset-0">{mediaEl}</div>
+        <motion.div className="absolute inset-0">{mediaFrame}</motion.div>
       ) : (
         <AnimatePresence mode="wait">
           <motion.div
@@ -72,15 +82,15 @@ export default function GalleryMedia({ galeria, title, accent, className = '' })
             transition={{ duration: 0.2 }}
             className="absolute inset-0"
           >
-            {mediaEl}
+            {mediaFrame}
           </motion.div>
         </AnimatePresence>
       )}
 
       {hasMultiple && (
         <>
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-bg-950/80 to-transparent px-3 pb-3 pt-8">
-            <div className="flex justify-center gap-1.5">
+          <motion.div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-bg-950/80 to-transparent px-3 pb-3 pt-8">
+            <motion.div className="flex justify-center gap-1.5">
               {valid.map((_, i) => (
                 <button
                   key={i}
@@ -95,8 +105,8 @@ export default function GalleryMedia({ galeria, title, accent, className = '' })
                   }`}
                 />
               ))}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           <button
             type="button"
@@ -126,6 +136,6 @@ export default function GalleryMedia({ galeria, title, accent, className = '' })
           </span>
         </>
       )}
-    </div>
+    </motion.div>
   )
 }

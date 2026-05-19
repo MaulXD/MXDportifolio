@@ -12,7 +12,12 @@ import {
   Layout,
 } from 'lucide-react'
 import ProjectGallery from './ProjectGallery'
-import { accentMap, getCategoryMeta, getGallerySummary } from '../lib/portfolioUtils'
+import {
+  accentMap,
+  getCategoryMeta,
+  getGallerySummary,
+  getVisibleGaleria,
+} from '../lib/portfolioUtils'
 import { useLightMotion } from '../hooks/useLightMotion'
 
 const ICONS = { Clapperboard, PenTool, Image: ImageIcon, Radio, Globe, Layout }
@@ -36,7 +41,9 @@ export default function ProjectModal({ project, onClose }) {
   const meta = getCategoryMeta(project.category)
   const styles = accentMap[meta.accent] ?? accentMap['neon-violet']
   const Icon = ICONS[meta.iconName] ?? Clapperboard
-  const { valid, label } = getGallerySummary(project.galeria)
+  const visibleGaleria = getVisibleGaleria(project.galeria)
+  const { label } = getGallerySummary(project.galeria)
+  const descricao = project.descricao?.trim()
 
   const panelMotion = lightMotion
     ? {
@@ -71,7 +78,7 @@ export default function ProjectModal({ project, onClose }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="project-modal-title"
-        className={`relative z-10 flex max-h-[92vh] w-full flex-col overflow-hidden border-t border-white/10 bg-bg-900 shadow-[0_-8px_48px_rgba(0,0,0,0.6)] sm:max-h-[88vh] sm:max-w-3xl sm:rounded-2xl sm:border ${styles.pageBorder ?? 'sm:border-white/10'}`}
+        className={`relative z-10 flex max-h-[92vh] w-full flex-col overflow-hidden border-t border-white/10 bg-bg-900 shadow-[0_-8px_48px_rgba(0,0,0,0.6)] sm:max-h-[90vh] sm:max-w-4xl sm:rounded-2xl sm:border ${styles.pageBorder ?? 'sm:border-white/10'}`}
         {...panelMotion}
         onClick={(e) => e.stopPropagation()}
       >
@@ -91,7 +98,21 @@ export default function ProjectModal({ project, onClose }) {
             >
               {project.title}
             </h2>
-            <p className="mt-1 text-xs text-white/45 sm:text-sm">{label}</p>
+            {descricao ? (
+              <div
+                className={`mt-3 rounded-xl border border-white/15 bg-bg-800/80 px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] sm:px-4 ${styles.badge}`}
+              >
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/60">
+                  Sobre o projeto
+                </p>
+                <p className="mt-1.5 text-sm leading-relaxed text-white/90 sm:text-[15px]">
+                  {descricao}
+                </p>
+              </div>
+            ) : null}
+            <p className={`text-xs text-white/40 sm:text-sm ${descricao ? 'mt-2.5' : 'mt-1'}`}>
+              {label}
+            </p>
           </div>
           <button
             type="button"
@@ -103,26 +124,31 @@ export default function ProjectModal({ project, onClose }) {
           </button>
         </div>
 
-        <div className="overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5">
-          {valid.length > 0 ? (
-            <ProjectGallery
-              items={valid}
-              title={project.title}
-              accentClass={styles.pageBorder ?? 'border-white/10'}
-            />
-          ) : (
-            <p className="py-8 text-center text-sm text-white/40">Sem mídia neste projeto.</p>
-          )}
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
+          <div className="mx-auto w-full max-w-2xl px-4 py-3 sm:px-6 sm:py-4">
+            {visibleGaleria.length > 0 ? (
+              <ProjectGallery
+                compact
+                items={visibleGaleria}
+                title={project.title}
+                accentClass={styles.pageBorder ?? 'border-white/10'}
+              />
+            ) : (
+              <p className="py-8 text-center text-sm text-white/40">Sem mídia neste projeto.</p>
+            )}
+          </div>
 
           {project.externalLink && (
-            <a
-              href={project.externalLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-neon-green py-3 text-sm font-semibold text-bg-950 sm:inline-flex sm:w-auto sm:px-6"
-            >
-              Ver publicado <ExternalLink size={14} />
-            </a>
+            <div className="shrink-0 border-t border-white/10 px-4 py-4 sm:px-6">
+              <a
+                href={project.externalLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-neon-green py-3 text-sm font-semibold text-bg-950 transition-opacity hover:opacity-90"
+              >
+                Ver publicado <ExternalLink size={14} />
+              </a>
+            </div>
           )}
         </div>
       </motion.div>

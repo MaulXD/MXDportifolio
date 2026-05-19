@@ -78,7 +78,7 @@ export default function GalleryMedia({
 
   const logoOverlay =
     logoUrl && cardPreview ? (
-      <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center p-6 sm:p-8">
+      <div className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center p-6 sm:p-8">
         <img
           src={logoUrl}
           alt=""

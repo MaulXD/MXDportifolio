@@ -153,9 +153,9 @@ export default function Portfolio() {
                         accent={styles}
                       />
 
-                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,255,157,0.08)_0%,transparent_70%)] opacity-0 transition-opacity duration-300 group-active:opacity-100 sm:group-hover:opacity-100" />
+                      <div className="pointer-events-none absolute inset-0 z-20 bg-[radial-gradient(circle_at_center,rgba(0,255,157,0.08)_0%,transparent_70%)] opacity-0 transition-opacity duration-300 group-active:opacity-100 sm:group-hover:opacity-100" />
 
-                      <div className="absolute inset-0 flex items-center justify-center bg-bg-950/60 opacity-0 transition-opacity duration-200 group-active:opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
+                      <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-bg-950/60 opacity-0 transition-opacity duration-200 group-active:opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
                         <span className="rounded-xl bg-neon-green px-4 py-2 text-sm font-semibold text-bg-950">
                           Ver projeto
                         </span>

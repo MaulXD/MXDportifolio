@@ -4,6 +4,10 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getGallerySummary, getProjectCoverMedia } from '../lib/portfolioUtils'
 import { useLightMotion } from '../hooks/useLightMotion'
 
+/** Imagem inteira (contain), cantos arredondados, sem recorte do conteúdo. */
+const MEDIA_CLASS =
+  'block h-auto w-auto max-h-full max-w-full object-contain object-center rounded-2xl ring-1 ring-white/[0.06]'
+
 export default function GalleryMedia({
   galeria,
   title,
@@ -35,7 +39,11 @@ export default function GalleryMedia({
 
   if (!current?.mediaUrl) {
     return (
-      <div className={`flex h-full items-center justify-center ${className}`}>
+      <div
+        className={`flex h-full items-center justify-center ${
+          cardPreview ? 'overflow-hidden rounded-t-2xl bg-bg-900/60' : ''
+        } ${className}`}
+      >
         <img
           src="/mxd-logo.png"
           alt=""
@@ -47,9 +55,6 @@ export default function GalleryMedia({
   }
 
   const isVideo = current?.tipoMedia === 'Vídeo'
-  const mediaClass = cardPreview
-    ? 'h-full w-full object-contain object-center'
-    : 'max-h-full max-w-full object-contain object-center drop-shadow-sm'
 
   const mediaEl = isVideo ? (
     <video
@@ -59,14 +64,14 @@ export default function GalleryMedia({
       loop
       muted
       playsInline
-      className={mediaClass}
+      className={MEDIA_CLASS}
     />
   ) : (
     <img
       key={current.mediaUrl}
       src={current.mediaUrl}
       alt={title ?? 'Projeto'}
-      className={mediaClass}
+      className={MEDIA_CLASS}
       loading="lazy"
     />
   )
@@ -83,27 +88,33 @@ export default function GalleryMedia({
       </div>
     ) : null
 
-  const mediaFrame = cardPreview ? (
-    <div className="absolute inset-0 overflow-hidden rounded-t-2xl bg-bg-900/60">
-      <div className="flex h-full w-full items-center justify-center p-3 sm:p-4">
-        <div className="relative h-full w-full overflow-hidden rounded-2xl ring-1 ring-white/[0.06]">
-          {mediaEl}
-        </div>
-      </div>
+  const mediaFrame = (
+    <div
+      className={`flex h-full min-h-0 w-full min-w-0 items-center justify-center p-4 sm:p-5 md:p-6 ${
+        cardPreview ? 'overflow-hidden rounded-t-2xl bg-bg-900/60' : ''
+      }`}
+    >
+      {mediaEl}
+    </div>
+  )
+
+  const framedContent = cardPreview ? (
+    <>
+      {mediaFrame}
       {logoOverlay}
-    </div>
+    </>
   ) : (
-    <div className="flex h-full w-full items-center justify-center p-4 sm:p-5">
-      <div className="relative overflow-hidden rounded-2xl ring-1 ring-white/[0.06]">{mediaEl}</div>
-    </div>
+    mediaFrame
   )
 
   return (
     <div
-      className={`relative h-full w-full bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.04)_0%,_transparent_72%)] ${className}`}
+      className={`relative h-full min-h-0 w-full min-w-0 bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.04)_0%,_transparent_72%)] ${className}`}
     >
-      {lightMotion ? (
-        <div className="absolute inset-0">{mediaFrame}</div>
+      {cardPreview ? (
+        <div className="absolute inset-0 min-h-0 min-w-0">{framedContent}</div>
+      ) : lightMotion ? (
+        <div className="absolute inset-0 min-h-0 min-w-0">{framedContent}</div>
       ) : (
         <AnimatePresence mode="wait">
           <motion.div
@@ -112,9 +123,9 @@ export default function GalleryMedia({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="absolute inset-0"
+            className="absolute inset-0 min-h-0 min-w-0"
           >
-            {mediaFrame}
+            {framedContent}
           </motion.div>
         </AnimatePresence>
       )}

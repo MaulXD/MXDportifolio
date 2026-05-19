@@ -22,21 +22,23 @@ function ThumbButton({ item, index, active, onSelect }) {
       }`}
       style={{ width: 88, height: 56 }}
     >
-      {isVideo ? (
-        <video
-          src={item.mediaUrl}
-          muted
-          playsInline
-          className="h-full w-full object-contain bg-bg-950"
-        />
-      ) : (
-        <img
-          src={item.mediaUrl}
-          alt=""
-          loading="lazy"
-          className="h-full w-full object-contain bg-bg-950"
-        />
-      )}
+      <div className="flex h-full w-full items-center justify-center p-1.5 sm:p-2">
+        {isVideo ? (
+          <video
+            src={item.mediaUrl}
+            muted
+            playsInline
+            className="h-auto w-auto max-h-full max-w-full object-contain rounded-lg"
+          />
+        ) : (
+          <img
+            src={item.mediaUrl}
+            alt=""
+            loading="lazy"
+            className="h-auto w-auto max-h-full max-w-full object-contain rounded-lg"
+          />
+        )}
+      </div>
       <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg-950/95 to-transparent px-1.5 pb-1 pt-4 text-left text-[9px] font-medium leading-tight text-white/90 line-clamp-1">
         {label}
       </span>
@@ -90,6 +92,10 @@ export default function ProjectGallery({
   const isVideo = current.tipoMedia === 'Vídeo'
   const currentLabel = getMediaLabel(current, activeIndex)
 
+  const mainMediaClass = `block h-auto w-auto max-h-full max-w-full object-contain object-center rounded-2xl ring-1 ring-white/[0.06] ${
+    compact ? 'max-h-[min(32vh,280px)]' : 'max-h-[min(50vh,420px)]'
+  }`
+
   const mainMedia = isVideo ? (
     <video
       key={current.mediaUrl}
@@ -99,23 +105,15 @@ export default function ProjectGallery({
       muted
       playsInline
       controls
-      className={`max-h-full max-w-full object-contain ${
-        compact ? 'max-h-[min(32vh,280px)]' : 'max-h-[min(50vh,420px)]'
-      }`}
+      className={mainMediaClass}
     />
   ) : (
     <img
       key={current.mediaUrl}
       src={current.mediaUrl}
       alt={title ? `${title}: ${currentLabel}` : currentLabel}
-      className={`max-h-full max-w-full object-contain ${
-        compact ? 'max-h-[min(32vh,280px)]' : 'max-h-[min(50vh,420px)]'
-      }`}
+      className={mainMediaClass}
     />
-  )
-
-  const mainMediaFrame = (
-    <div className="overflow-hidden rounded-2xl">{mainMedia}</div>
   )
 
   return (
@@ -162,8 +160,8 @@ export default function ProjectGallery({
         <div
           className={`relative flex items-center justify-center bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.04)_0%,_transparent_70%)] ${
             compact
-              ? 'min-h-[140px] px-3 py-4 sm:px-5 sm:py-5'
-              : 'min-h-[200px] px-4 py-6 sm:px-8 sm:py-8'
+              ? 'min-h-[140px] px-4 py-5 sm:px-6 sm:py-6'
+              : 'min-h-[200px] px-5 py-7 sm:px-8 sm:py-9'
           }`}
         >
           {count > 1 && (
@@ -188,7 +186,7 @@ export default function ProjectGallery({
           )}
 
           {lightMotion ? (
-            <div className="flex items-center justify-center">{mainMediaFrame}</div>
+            <div className="flex items-center justify-center">{mainMedia}</div>
           ) : (
             <AnimatePresence mode="wait">
               <motion.div
@@ -199,7 +197,7 @@ export default function ProjectGallery({
                 transition={{ duration: 0.2 }}
                 className="flex items-center justify-center"
               >
-                {mainMediaFrame}
+                {mainMedia}
               </motion.div>
             </AnimatePresence>
           )}

@@ -84,7 +84,7 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce), (max-width: 768px) {
   .neon-card-stroke rect {
     animation: none;
     opacity: 0;

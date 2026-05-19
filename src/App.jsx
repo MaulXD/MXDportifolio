@@ -1,14 +1,13 @@
 import { useEffect } from 'react'
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import HomePage from './pages/HomePage'
-import ProjectPage from './pages/ProjectPage'
 
 function ScrollToHash() {
   const { pathname, hash } = useLocation()
 
   useEffect(() => {
     if (!hash) {
-      window.scrollTo(0, 0)
+      if (pathname === '/') window.scrollTo(0, 0)
       return
     }
     const id = hash.replace('#', '')
@@ -30,7 +29,7 @@ function AppShell() {
       <ScrollToHash />
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/projeto/:slug" element={<ProjectPage />} />
+        <Route path="/projeto/:slug" element={<Navigate to="/#portfolio" replace />} />
       </Routes>
     </div>
   )

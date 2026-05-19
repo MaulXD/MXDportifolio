@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Film, Image as ImageIcon } from 'lucide-react'
 import { getMediaLabel } from '../lib/portfolioUtils'
+import { useLightMotion } from '../hooks/useLightMotion'
 
 export default function ProjectGallery({ items, title, accentClass = 'border-neon-green/30' }) {
   const [activeIndex, setActiveIndex] = useState(0)
+  const lightMotion = useLightMotion()
   const current = items[activeIndex] ?? null
 
   useEffect(() => {
@@ -22,9 +24,29 @@ export default function ProjectGallery({ items, title, accentClass = 'border-neo
   const isVideo = current?.tipoMedia === 'Vídeo'
   const currentLabel = getMediaLabel(current, activeIndex)
 
+  const mainMedia = isVideo ? (
+    <video
+      key={current.mediaUrl}
+      src={current.mediaUrl}
+      autoPlay
+      loop
+      muted
+      playsInline
+      controls
+      className="max-h-full max-w-full rounded-lg object-contain"
+    />
+  ) : (
+    <img
+      key={current.mediaUrl}
+      src={current.mediaUrl}
+      alt={title ? `${title} — ${currentLabel}` : currentLabel}
+      className="max-h-full max-w-full rounded-lg object-contain"
+    />
+  )
+
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-5">
-      <motion.div className="order-2 lg:order-1 lg:w-[120px] lg:flex-shrink-0">
+      <div className="order-2 lg:order-1 lg:w-[120px] lg:flex-shrink-0">
         <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-white/40 lg:sr-only">
           Galeria
         </p>
@@ -40,7 +62,7 @@ export default function ProjectGallery({ items, title, accentClass = 'border-neo
                   onClick={() => setActiveIndex(i)}
                   aria-label={`Ver ${thumbLabel}`}
                   aria-current={active ? 'true' : undefined}
-                  className={`relative aspect-video overflow-hidden rounded-lg border transition-all lg:aspect-[4/3] ${
+                  className={`relative aspect-video overflow-hidden rounded-lg border transition-colors lg:aspect-[4/3] ${
                     active
                       ? 'border-neon-green/60 ring-2 ring-neon-green/25'
                       : 'border-white/10 opacity-75 hover:border-white/30 hover:opacity-100'
@@ -77,41 +99,28 @@ export default function ProjectGallery({ items, title, accentClass = 'border-neo
             )
           })}
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
-        layout
+      <div
         className={`order-1 lg:order-2 relative mx-auto w-full max-w-2xl flex-1 overflow-hidden rounded-xl border bg-bg-800/60 lg:mx-0 ${accentClass}`}
       >
         <div className="relative flex aspect-[4/3] max-h-[min(42vh,360px)] items-center justify-center bg-bg-900/50 sm:max-h-[min(46vh,400px)]">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`${current.mediaUrl}-${activeIndex}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="absolute inset-0 flex items-center justify-center p-2"
-            >
-              {isVideo ? (
-                <video
-                  src={current.mediaUrl}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  controls
-                  className="max-h-full max-w-full rounded-lg object-contain"
-                />
-              ) : (
-                <img
-                  src={current.mediaUrl}
-                  alt={title ? `${title} — ${currentLabel}` : currentLabel}
-                  className="max-h-full max-w-full rounded-lg object-contain"
-                />
-              )}
-            </motion.div>
-          </AnimatePresence>
+          {lightMotion ? (
+            <div className="absolute inset-0 flex items-center justify-center p-2">{mainMedia}</div>
+          ) : (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${current.mediaUrl}-${activeIndex}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="absolute inset-0 flex items-center justify-center p-2"
+              >
+                {mainMedia}
+              </motion.div>
+            </AnimatePresence>
+          )}
         </div>
         <div className="border-t border-white/5 px-3 py-2.5 text-center">
           <p className="text-sm font-medium text-white/90">{currentLabel}</p>
@@ -120,7 +129,7 @@ export default function ProjectGallery({ items, title, accentClass = 'border-neo
             {isVideo ? ' · Vídeo' : ' · Imagem'}
           </p>
         </div>
-      </motion.div>
+      </div>
     </div>
   )
 }

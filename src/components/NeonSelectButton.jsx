@@ -1,4 +1,5 @@
 import { useCallback, useId, useLayoutEffect, useRef, useState } from 'react'
+import { useLightMotion } from '../hooks/useLightMotion'
 
 const ACCENTS = {
   green: {
@@ -36,6 +37,7 @@ export default function NeonSelectButton({
   layout = 'row',
 }) {
   const a = ACCENTS[accent] ?? ACCENTS.cyan
+  const lightMotion = useLightMotion()
   const uid = useId()
   const cardRef = useRef(null)
   const [strokeKey, setStrokeKey] = useState(0)
@@ -70,8 +72,10 @@ export default function NeonSelectButton({
     e.preventDefault()
     e.stopPropagation()
     onClick()
-    measure()
-    setStrokeKey((k) => k + 1)
+    if (!lightMotion) {
+      measure()
+      setStrokeKey((k) => k + 1)
+    }
   }
 
   const { w, h } = size
@@ -92,7 +96,7 @@ export default function NeonSelectButton({
             : 'border-white/10 bg-bg-900/50 text-white/60 hover:border-white/20'
         }`}
       >
-        {strokeKey > 0 && w > 0 && h > 0 && (
+        {!lightMotion && strokeKey > 0 && w > 0 && h > 0 && (
           <svg
             key={strokeKey}
             width={w}

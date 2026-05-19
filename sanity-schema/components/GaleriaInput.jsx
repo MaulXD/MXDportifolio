@@ -20,7 +20,7 @@ import {
   AddIcon,
   FolderIcon,
 } from '@sanity/icons'
-import { PatchEvent, set, useClient } from 'sanity'
+import { PatchEvent, set, useClient, useFormValue } from 'sanity'
 import { GALERIA_PASTA_PADRAO, GALERIA_PASTA_SUGESTOES } from '../galeriaFolders.js'
 
 const ACCEPT = 'video/webm,image/png,image/webp,.webm,.png,.webp'
@@ -300,6 +300,7 @@ export default function GaleriaInput(props) {
   const [novaPastaNome, setNovaPastaNome] = useState('')
   const migratedRef = useRef(false)
 
+  const capaMidiaKey = useFormValue(['capaMidiaKey'])
   const folders = useMemo(() => normalizeFolders(value), [value])
   const flatItems = useMemo(() => flattenItems(folders), [folders])
   const assetUrls = useAssetPreviewUrls(flatItems, client)
@@ -493,6 +494,11 @@ export default function GaleriaInput(props) {
   const firstItemKey = firstVisibleFolder?.itens?.[0]?._key
   const title = schemaType?.title || 'Galeria do Projeto'
 
+  const isCapaItem = (itemKey, folder) => {
+    if (capaMidiaKey) return itemKey === capaMidiaKey
+    return folder._key === firstVisibleFolder?._key && itemKey === firstItemKey
+  }
+
   const sugestoesDisponiveis = GALERIA_PASTA_SUGESTOES.filter(
     (nome) => !folders.some((f) => f.nome.toLowerCase() === nome.toLowerCase()),
   )
@@ -541,8 +547,8 @@ export default function GaleriaInput(props) {
           {title}
         </Text>
         <Text size={1} muted>
-          Crie pastas (Telas, Painéis, Transições…) e envie arquivos em cada uma. A primeira mídia
-          da primeira pasta vira capa no site.
+          Crie pastas (Telas, Painéis, Transições…) e envie arquivos em cada uma. Defina a capa do
+          card na seção &quot;Capa do card&quot; abaixo da galeria.
         </Text>
       </Stack>
 
@@ -689,7 +695,7 @@ export default function GaleriaInput(props) {
             {folder.itens.length > 0 && (
               <Grid columns={[1, 2, 3]} gap={3}>
                 {folder.itens.map((item, itemIndex) => {
-                  const isCover = item._key === firstItemKey && folderIndex === 0
+                  const isCover = isCapaItem(item._key, folder)
 
                   return (
                     <MediaCard

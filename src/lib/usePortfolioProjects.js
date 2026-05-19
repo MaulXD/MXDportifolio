@@ -4,6 +4,7 @@ import {
   PORTFOLIO_QUERY,
   isSanityConfigured,
   getSanityErrorMessage,
+  PORTFOLIO_LOAD_ERROR_PUBLIC,
 } from './sanityClient'
 import { normalizeProject } from './portfolioUtils'
 
@@ -24,7 +25,9 @@ export function usePortfolioProjects() {
           if (!cancelled) {
             setProjects([])
             setError(
-              'Sanity não configurado. Crie o arquivo .env com VITE_SANITY_PROJECT_ID e VITE_SANITY_DATASET.',
+              import.meta.env.DEV
+                ? 'Sanity não configurado. Crie o arquivo .env com VITE_SANITY_PROJECT_ID e VITE_SANITY_DATASET.'
+                : PORTFOLIO_LOAD_ERROR_PUBLIC,
             )
           }
           return

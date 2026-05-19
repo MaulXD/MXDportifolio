@@ -27,14 +27,14 @@ function ThumbButton({ item, index, active, onSelect }) {
           src={item.mediaUrl}
           muted
           playsInline
-          className="h-full w-full rounded-xl object-contain bg-bg-950"
+          className="h-full w-full object-contain bg-bg-950"
         />
       ) : (
         <img
           src={item.mediaUrl}
           alt=""
           loading="lazy"
-          className="h-full w-full rounded-xl object-contain bg-bg-950"
+          className="h-full w-full object-contain bg-bg-950"
         />
       )}
       <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg-950/95 to-transparent px-1.5 pb-1 pt-4 text-left text-[9px] font-medium leading-tight text-white/90 line-clamp-1">
@@ -99,7 +99,7 @@ export default function ProjectGallery({
       muted
       playsInline
       controls
-      className={`w-auto max-w-full rounded-2xl object-contain ${
+      className={`max-h-full max-w-full object-contain ${
         compact ? 'max-h-[min(32vh,280px)]' : 'max-h-[min(50vh,420px)]'
       }`}
     />
@@ -108,10 +108,14 @@ export default function ProjectGallery({
       key={current.mediaUrl}
       src={current.mediaUrl}
       alt={title ? `${title}: ${currentLabel}` : currentLabel}
-      className={`w-auto max-w-full rounded-2xl object-contain ${
+      className={`max-h-full max-w-full object-contain ${
         compact ? 'max-h-[min(32vh,280px)]' : 'max-h-[min(50vh,420px)]'
       }`}
     />
+  )
+
+  const mainMediaFrame = (
+    <div className="overflow-hidden rounded-2xl">{mainMedia}</div>
   )
 
   return (
@@ -153,7 +157,7 @@ export default function ProjectGallery({
       )}
 
       <div
-        className={`relative overflow-hidden rounded-xl border bg-bg-950/80 ${accentClass}`}
+        className={`relative overflow-hidden rounded-2xl border bg-bg-950/80 ${accentClass}`}
       >
         <div
           className={`relative flex items-center justify-center bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.04)_0%,_transparent_70%)] ${
@@ -184,7 +188,7 @@ export default function ProjectGallery({
           )}
 
           {lightMotion ? (
-            <div className="flex items-center justify-center">{mainMedia}</div>
+            <div className="flex items-center justify-center">{mainMediaFrame}</div>
           ) : (
             <AnimatePresence mode="wait">
               <motion.div
@@ -195,7 +199,7 @@ export default function ProjectGallery({
                 transition={{ duration: 0.2 }}
                 className="flex items-center justify-center"
               >
-                {mainMedia}
+                {mainMediaFrame}
               </motion.div>
             </AnimatePresence>
           )}

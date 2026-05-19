@@ -1,5 +1,6 @@
 import { PORTFOLIO_CATEGORY_OPTIONS } from '../src/lib/portfolioCategories.js'
 import GaleriaInput from './components/GaleriaInput.jsx'
+import CapaPickerInput from './components/CapaPickerInput.jsx'
 
 /**
  * Schema do documento "portfolio" para o Sanity Studio.
@@ -8,6 +9,13 @@ export default {
   name: 'portfolio',
   title: 'Portfólio',
   type: 'document',
+  fieldsets: [
+    {
+      name: 'site',
+      title: 'Visibilidade e ordem no site',
+      options: { collapsible: true, collapsed: true },
+    },
+  ],
   fields: [
     {
       name: 'title',
@@ -56,6 +64,39 @@ export default {
       validation: (Rule) => Rule.required(),
     },
     {
+      name: 'exibirEmTodos',
+      title: 'Exibir em Todos (geral)',
+      type: 'boolean',
+      fieldset: 'site',
+      description: 'Se desmarcado, o projeto não aparece no filtro "Todos" do site.',
+      initialValue: true,
+    },
+    {
+      name: 'exibirNaCategoria',
+      title: 'Exibir no filtro da categoria',
+      type: 'boolean',
+      fieldset: 'site',
+      description:
+        'Se desmarcado, o projeto não aparece ao filtrar pela categoria dele (ex.: só Motions).',
+      initialValue: true,
+    },
+    {
+      name: 'ordemGeral',
+      title: 'Ordem em Todos',
+      type: 'number',
+      fieldset: 'site',
+      description: 'Ordem no filtro geral. Ajuste pela grade "Organizar portfólio".',
+      initialValue: 0,
+    },
+    {
+      name: 'ordemCategoria',
+      title: 'Ordem na categoria',
+      type: 'number',
+      fieldset: 'site',
+      description: 'Ordem dentro da categoria no site. Ajuste pela grade "Organizar portfólio".',
+      initialValue: 0,
+    },
+    {
       name: 'descricao',
       title: 'Descrição do projeto',
       type: 'text',
@@ -68,7 +109,7 @@ export default {
       title: 'Galeria do Projeto',
       type: 'array',
       description:
-        'Organize em pastas (Telas, Painéis, Transições…). Arraste arquivos na pasta desejada. A primeira mídia da primeira pasta vira capa no site.',
+        'Organize em pastas (Telas, Painéis, Transições…). Arraste arquivos na pasta desejada.',
       of: [{ type: 'galeriaPasta' }],
       components: {
         input: GaleriaInput,
@@ -88,6 +129,26 @@ export default {
           if (missing) return 'Cada arquivo precisa estar enviado.'
           return true
         }),
+    },
+    {
+      name: 'capaMidiaKey',
+      title: 'Capa do card (thumbnail)',
+      type: 'string',
+      description: 'Mídia exibida na miniatura do portfólio. Escolha abaixo após enviar a galeria.',
+      components: {
+        input: CapaPickerInput,
+      },
+    },
+    {
+      name: 'logoCapa',
+      title: 'Logo sobre a capa',
+      type: 'image',
+      description:
+        'PNG ou WebP com fundo transparente. Aparece centralizado por cima da capa no card do site.',
+      options: {
+        accept: 'image/png,image/webp',
+        hotspot: false,
+      },
     },
     {
       name: 'externalLink',

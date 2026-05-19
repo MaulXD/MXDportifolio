@@ -77,6 +77,7 @@ function inferLegenda(item) {
 function mapGaleriaItem(item, pasta = 'Geral', exibirPasta = true) {
   if (!item || typeof item.mediaUrl !== 'string' || !item.mediaUrl.length) return null
   return {
+    _key: item._key || null,
     pasta: pasta.trim() || 'Geral',
     exibirPasta: exibirPasta !== false,
     tipoMedia: inferTipoMedia(item),
@@ -139,6 +140,7 @@ export function normalizeProject(raw) {
   if (galeria.length === 0 && raw.legacyMediaUrl) {
     galeria = [
       {
+        _key: null,
         pasta: 'Geral',
         exibirPasta: true,
         tipoMedia: raw.legacyMediaType === 'Vídeo' ? 'Vídeo' : 'Imagem',
@@ -149,6 +151,10 @@ export function normalizeProject(raw) {
   }
 
   const slug = raw.slug ?? null
+  const capaMidiaKey =
+    typeof raw.capaMidiaKey === 'string' && raw.capaMidiaKey.trim()
+      ? raw.capaMidiaKey.trim()
+      : null
 
   return {
     _id: raw._id ?? slug ?? `project-${Math.random().toString(36).slice(2)}`,
@@ -157,8 +163,54 @@ export function normalizeProject(raw) {
     category: normalizeCategory(raw.category),
     externalLink: raw.externalLink ?? null,
     descricao: typeof raw.descricao === 'string' ? raw.descricao.trim() : '',
+    capaMidiaKey,
+    logoCapaUrl:
+      typeof raw.logoCapaUrl === 'string' && raw.logoCapaUrl.trim()
+        ? raw.logoCapaUrl.trim()
+        : null,
+    exibirEmTodos: raw.exibirEmTodos !== false,
+    exibirNaCategoria: raw.exibirNaCategoria !== false,
+    ordemGeral: typeof raw.ordemGeral === 'number' ? raw.ordemGeral : null,
+    ordemCategoria: typeof raw.ordemCategoria === 'number' ? raw.ordemCategoria : null,
     galeria,
   }
+}
+
+function compareOrder(a, b, key) {
+  const oa = a[key]
+  const ob = b[key]
+  if (typeof oa === 'number' && typeof ob === 'number' && oa !== ob) return oa - ob
+  if (typeof oa === 'number' && typeof ob !== 'number') return -1
+  if (typeof oa !== 'number' && typeof ob === 'number') return 1
+  return 0
+}
+
+/** Filtra e ordena projetos conforme o filtro ativo no site. */
+export function filterProjectsForView(projects, filter) {
+  const list = Array.isArray(projects) ? projects.filter(Boolean) : []
+
+  if (filter === 'Todos') {
+    return list
+      .filter((p) => p.exibirEmTodos !== false)
+      .sort((a, b) => compareOrder(a, b, 'ordemGeral'))
+  }
+
+  return list
+    .filter((p) => p.category === filter && p.exibirNaCategoria !== false)
+    .sort((a, b) => compareOrder(a, b, 'ordemCategoria'))
+}
+
+/** Mídia usada na miniatura do card (capa escolhida ou primeira visível). */
+export function getProjectCoverMedia(project) {
+  const list = Array.isArray(project?.galeria) ? project.galeria : []
+  const visible = getVisibleGaleria(list)
+
+  if (project?.capaMidiaKey) {
+    const picked = list.find((item) => item?._key === project.capaMidiaKey && item?.mediaUrl)
+    if (picked) return picked
+  }
+
+  return visible[0] ?? list[0] ?? null
 }
 
 export function getMediaLabel(item, index = 0) {
@@ -177,7 +229,7 @@ export function getGallerySummary(galeria) {
   if (pastas.length > 1) parts.push(`${pastas.length} pastas`)
   if (videos) parts.push(`${videos} vídeo${videos > 1 ? 's' : ''}`)
   if (images) parts.push(`${images} ${images > 1 ? 'imagens' : 'imagem'}`)
-  return { valid, pastas, label: parts.length ? parts.join(' · ') : 'Sem mídia' }
+  return { valid, pastas, label: parts.length ? parts.join(' · ') : '' }
 }
 
 export function getProjectPath(project) {

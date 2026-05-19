@@ -133,9 +133,7 @@ export default function ProjectModal({ project, onClose }) {
                 title={project.title}
                 accentClass={styles.pageBorder ?? 'border-white/10'}
               />
-            ) : (
-              <p className="py-8 text-center text-sm text-white/40">Sem mídia neste projeto.</p>
-            )}
+            ) : null}
           </div>
 
           {project.externalLink && (

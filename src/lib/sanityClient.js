@@ -23,6 +23,12 @@ const PORTFOLIO_FIELDS = `{
   "slug": slug.current,
   category,
   descricao,
+  exibirEmTodos,
+  exibirNaCategoria,
+  ordemGeral,
+  ordemCategoria,
+  capaMidiaKey,
+  "logoCapaUrl": coalesce(logoCapa.asset->url, null),
   "legacyMediaUrl": coalesce(mediaFile.asset->url, null),
   "legacyMediaType": coalesce(mediaType, "Imagem"),
   "galeriaEntries": galeria[]{
@@ -30,6 +36,7 @@ const PORTFOLIO_FIELDS = `{
     nome,
     exibirNoSite,
     itens[]{
+      _key,
       "legenda": coalesce(legenda, ""),
       "tipoMedia": coalesce(
         tipoMedia,
@@ -57,14 +64,19 @@ const PORTFOLIO_FIELDS = `{
   externalLink
 }`
 
-export const PORTFOLIO_QUERY = `*[_type == "portfolio"] | order(_createdAt desc) ${PORTFOLIO_FIELDS}`
+export const PORTFOLIO_QUERY = `*[_type == "portfolio"] | order(ordemGeral asc, _createdAt desc) ${PORTFOLIO_FIELDS}`
 
 export const PROJECT_BY_SLUG_QUERY = `*[_type == "portfolio" && slug.current == $slug][0] ${PORTFOLIO_FIELDS}`
 
 export const PROJECT_BY_ID_QUERY = `*[_type == "portfolio" && _id == $id][0] ${PORTFOLIO_FIELDS}`
 
-/** Mensagem amigável conforme o tipo de falha */
+export const PORTFOLIO_LOAD_ERROR_PUBLIC =
+  'Não foi possível carregar os projetos. Tente novamente mais tarde.'
+
+/** Mensagem para o visitante; detalhes técnicos só em desenvolvimento. */
 export function getSanityErrorMessage(err) {
+  if (!import.meta.env.DEV) return PORTFOLIO_LOAD_ERROR_PUBLIC
+
   const msg = err?.message ?? String(err)
   if (/cors|blocked|fetch failed/i.test(msg)) {
     return 'CORS bloqueou a API do Sanity. Em sanity.io/manage → API → CORS, adicione http://localhost:5173 e o domínio do site publicado.'

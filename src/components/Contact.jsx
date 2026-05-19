@@ -2,10 +2,8 @@ import { useRef, useState, useCallback } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { Mail, Phone, Check } from 'lucide-react'
 import WhatsAppIcon from './icons/WhatsAppIcon'
-import NeonSelectButton from './NeonSelectButton'
 
 const WHATSAPP_URL = 'https://wa.me/5582993554322'
-const WHATSAPP_ID = 'whatsapp'
 const PHONE_ID = 'phone'
 const PHONE_DISPLAY = '(82) 99355-4322'
 
@@ -30,7 +28,6 @@ export default function Contact() {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
   const [copiedId, setCopiedId] = useState(null)
-  const [selectedContact, setSelectedContact] = useState(null)
 
   const copyText = useCallback(async (id, text) => {
     try {
@@ -41,16 +38,6 @@ export default function Contact() {
       /* clipboard bloqueado */
     }
   }, [])
-
-  const handlePhone = () => {
-    setSelectedContact(PHONE_ID)
-    copyText(PHONE_ID, PHONE_DISPLAY)
-  }
-
-  const handleWhatsApp = () => {
-    setSelectedContact(WHATSAPP_ID)
-    window.open(WHATSAPP_URL, '_blank', 'noopener,noreferrer')
-  }
 
   return (
     <section id="contact" className="relative py-24 sm:py-32">
@@ -115,47 +102,40 @@ export default function Contact() {
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.15 + EMAIL_CHANNELS.length * 0.08 }}
-            className="flex w-full gap-2"
+            className="glass-hover group flex w-full items-center gap-2 rounded-xl px-5 py-3.5 sm:gap-3 sm:px-6"
           >
-            <NeonSelectButton
-              accent="amber"
-              active={selectedContact === PHONE_ID}
-              animateStroke
-              onClick={handlePhone}
-              className="min-w-0 flex-1"
+            <button
+              type="button"
+              onClick={() => copyText(PHONE_ID, PHONE_DISPLAY)}
+              className="flex min-w-0 flex-1 items-center gap-3 text-left"
               aria-label={`Copiar telefone ${PHONE_DISPLAY}`}
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-bg-700/80">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-bg-700/80 transition-shadow group-hover:shadow-[0_0_16px_rgba(245,158,11,0.4)]">
                 {copiedId === PHONE_ID ? (
                   <Check size={20} className="text-neon-green" />
                 ) : (
                   <Phone size={18} className="text-neon-amber" />
                 )}
-              </span>
-              <span className="min-w-0 flex-1 text-left">
-                <span className="block text-xs text-white/40">Telefone</span>
-                <span className="mt-0.5 block text-sm font-medium text-white">{PHONE_DISPLAY}</span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-white/40">Telefone / WhatsApp</p>
+                <p className="mt-0.5 text-sm font-medium text-white transition-colors group-hover:text-neon-green">
+                  {PHONE_DISPLAY}
+                </p>
                 {copiedId === PHONE_ID && (
-                  <span className="mt-1 block text-xs font-medium text-neon-green">
-                    Telefone copiado!
-                  </span>
+                  <p className="mt-1.5 text-xs font-medium text-neon-green">Telefone copiado!</p>
                 )}
-              </span>
-            </NeonSelectButton>
-
-            <NeonSelectButton
-              accent="whatsapp"
-              active={selectedContact === WHATSAPP_ID}
-              animateStroke
-              layout="col"
-              onClick={handleWhatsApp}
-              className="w-[3.25rem] shrink-0"
+              </div>
+            </button>
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#25D366]/30 bg-[#25D366]/10 text-[#25D366] transition-all hover:border-[#25D366]/50 hover:bg-[#25D366]/20 hover:shadow-[0_0_16px_rgba(37,211,102,0.35)]"
               aria-label="Abrir WhatsApp"
             >
-              <span className="flex h-10 w-10 items-center justify-center text-[#25D366]">
-                <WhatsAppIcon size={22} />
-              </span>
-            </NeonSelectButton>
+              <WhatsAppIcon size={20} />
+            </a>
           </motion.div>
         </div>
       </motion.div>

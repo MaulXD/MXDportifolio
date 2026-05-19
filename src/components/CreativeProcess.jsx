@@ -31,6 +31,7 @@ const PILLARS = [
     dotColor: DOT_COLORS['neon-green'],
     iconClass: 'text-neon-green',
     border: 'border-neon-green/20',
+    hoverBorder: 'hover:shadow-[inset_0_0_0_1px_rgba(0,255,157,0.4)]',
     bg: 'from-neon-green/10',
     items: [
       { icon: MessageCircle, text: 'Briefing e alinhamento de objetivos com o cliente' },
@@ -48,6 +49,7 @@ const PILLARS = [
     dotColor: DOT_COLORS['neon-cyan'],
     iconClass: 'text-neon-cyan',
     border: 'border-neon-cyan/20',
+    hoverBorder: 'hover:shadow-[inset_0_0_0_1px_rgba(14,165,233,0.4)]',
     bg: 'from-neon-cyan/10',
     items: [
       { icon: PenTool, text: 'Branding, logotipos e identidade visual' },
@@ -61,13 +63,16 @@ const PILLARS = [
     icon: Briefcase,
     title: 'Experiência & rotina',
     summary:
-      'Mais de cinco anos unindo design e organização. Hoje combino criação no IDHES com gestão administrativa, o que reforça prazo e comunicação.',
+      'Mais de nove anos em design desde 2017. Front-end na VF Datamining (2019–2020). Hoje combino criação no IDHES com gestão administrativa desde 2021.',
     dotColor: DOT_COLORS['neon-violet'],
     iconClass: 'text-neon-violet',
     border: 'border-neon-violet/20',
+    hoverBorder: 'hover:shadow-[inset_0_0_0_1px_rgba(139,92,246,0.4)]',
     bg: 'from-neon-violet/10',
     items: [
-      { text: '5+ anos entre design gráfico, motion e front-end' },
+      { text: 'Front-end na VF Datamining (ago. 2019 – dez. 2020)' },
+      { text: '9+ anos em design gráfico e motion (desde 2017)' },
+      { text: '5+ anos em gestão e organização (desde mar. 2021)' },
       { text: 'Experiência com marcas, instituições e projetos autorais' },
       { text: 'Hábito de documentar etapas e manter o cliente informado' },
       { text: 'Adaptação a fluxos ágeis, do rascunho ao arquivo final' },
@@ -82,6 +87,7 @@ const PILLARS = [
     dotColor: DOT_COLORS['neon-amber'],
     iconClass: 'text-neon-amber',
     border: 'border-neon-amber/20',
+    hoverBorder: 'hover:shadow-[inset_0_0_0_1px_rgba(245,158,11,0.4)]',
     bg: 'from-neon-amber/10',
     items: [
       { text: 'Portfólio em constante atualização no site' },
@@ -93,8 +99,8 @@ const PILLARS = [
 ]
 
 const HOVER_IN =
-  'hover:-translate-y-0.5 hover:[transition:transform_0.2s_ease-out,box-shadow_0.2s_ease-out]'
-const HOVER_OUT = '[transition:transform_0s,box-shadow_0s]'
+  'hover:-translate-y-1.5 hover:[transition:transform_0.2s_ease-out,box-shadow_0.2s_ease-out,opacity_0.2s_ease-out]'
+const HOVER_OUT = '[transition:transform_0s,box-shadow_0s,opacity_0s]'
 
 export default function CreativeProcess() {
   const ref = useRef(null)
@@ -114,9 +120,9 @@ export default function CreativeProcess() {
       >
         <span className="section-label">Como trabalho</span>
         <h2 className="section-heading">
-          Da ideia à <span className="text-neon">entrega</span>
+          No <span className="text-neon">detalhe</span>
         </h2>
-        <p className="mt-3 max-w-xl text-base text-white/50 sm:text-[17px] sm:leading-relaxed">
+        <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/50">
           Processo, áreas, experiência e visão de projeto em um panorama direto de como é
           trabalhar comigo.
         </p>
@@ -136,40 +142,40 @@ export default function CreativeProcess() {
                   duration: lightMotion ? 0.2 : 0.45,
                   delay: lightMotion ? 0 : 0.08 + i * 0.06,
                 }}
-                className={`relative overflow-hidden rounded-lg border ${pillar.border} bg-bg-800/35 p-4 sm:p-5 ${HOVER_OUT} ${HOVER_IN}`}
+                className={`group relative overflow-hidden rounded-lg border border-white/5 bg-bg-800/50 p-4 sm:p-5 ${HOVER_OUT} ${HOVER_IN} ${pillar.hoverBorder}`}
               >
                 <div
-                  className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${pillar.bg} to-transparent opacity-25`}
+                  className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${pillar.bg} to-transparent opacity-0 group-hover:opacity-100 ${HOVER_OUT} group-hover:[transition:opacity_0.2s_ease-out]`}
                 />
 
-                <div className="relative">
+                <div className="relative z-10">
                   <div className="flex items-start gap-3">
                     <div
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/10 bg-bg-700/70 ${pillar.iconClass}`}
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/10 bg-bg-700/80 ${pillar.iconClass}`}
                     >
-                      <Icon size={17} />
+                      <Icon size={15} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-display text-base font-bold leading-snug text-white sm:text-lg">
+                      <h3 className="font-display text-sm font-bold leading-snug text-white sm:text-base">
                         {pillar.title}
                       </h3>
-                      <p className="mt-1.5 text-xs leading-relaxed text-white/50 sm:text-sm">
+                      <p className="mt-1 text-[11px] leading-relaxed text-white/50 sm:text-xs">
                         {pillar.summary}
                       </p>
                     </div>
                   </div>
 
-                  <ul className="mt-3 space-y-1.5 border-t border-white/5 pt-3">
+                  <ul className="mt-2.5 space-y-1 border-t border-white/5 pt-2.5">
                     {pillar.items.map((item) => {
                       const ItemIcon = item.icon
                       return (
                         <li
                           key={item.text}
-                          className="flex items-start gap-2 text-xs leading-relaxed text-white/55 sm:text-sm"
+                          className="flex items-start gap-2 text-[11px] leading-relaxed text-white/55 sm:text-xs"
                         >
                           {ItemIcon ? (
                             <ItemIcon
-                              size={14}
+                              size={12}
                               className={`mt-0.5 shrink-0 ${pillar.iconClass}`}
                             />
                           ) : (

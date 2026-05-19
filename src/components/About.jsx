@@ -47,8 +47,10 @@ export default function About() {
             <strong className="text-neon">desenvolvimento front-end</strong>.
           </p>
           <p className="mt-4 text-base leading-relaxed text-white/60 sm:text-lg">
-            Com experiência em identidades visuais, edição audiovisual e interfaces web, transformo
-            ideias em experiências visuais memoráveis, do conceito ao código final.
+            Trabalho com design desde <strong className="text-white">2017</strong> — mais de nove
+            anos em identidades visuais, motion e peças para redes — e com front-end na VF
+            Datamining (2019–2020). Transformo ideias em experiências visuais memoráveis, do
+            conceito ao código final.
           </p>
           <p className="mt-4 text-base leading-relaxed text-white/60 sm:text-lg">
             Atualmente atuo como Designer Gráfico no IDHES e Supervisor Administrativo na Sarmento

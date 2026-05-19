@@ -24,6 +24,14 @@ const EXPERIENCES = [
     status: 'Concluído',
     active: false,
   },
+  {
+    role: 'Design gráfico & motion',
+    company: 'Projetos autorais, freelances e clientes',
+    period: 'Desde 2017',
+    status: 'Base criativa',
+    active: false,
+    foundational: true,
+  },
 ]
 
 const COURSES = [
@@ -51,6 +59,10 @@ export default function Experience() {
         <h2 className="section-heading">
           Trajetória <span className="text-neon">profissional</span>
         </h2>
+        <p className="mt-4 max-w-2xl text-white/50">
+          Mais de <strong className="text-white/80">9 anos em design</strong> desde 2017, somando
+          projetos autorais, freelances e atuação em empresas.
+        </p>
 
         <motion.div
           initial={{ opacity: 0 }}
@@ -81,12 +93,18 @@ export default function Experience() {
                   className={`absolute left-0 top-1.5 h-[22px] w-[22px] rounded-full border-2 sm:h-[30px] sm:w-[30px] ${
                     exp.active
                       ? 'border-neon-green bg-bg-900 shadow-[0_0_12px_rgba(0,255,157,0.6)]'
-                      : 'border-neon-cyan/50 bg-bg-900'
+                      : exp.foundational
+                        ? 'border-neon-violet/50 bg-bg-900'
+                        : 'border-neon-cyan/50 bg-bg-900'
                   } ${exp.active ? 'animate-pulse-neon' : ''}`}
                 >
                   <div
                     className={`absolute inset-1 rounded-full ${
-                      exp.active ? 'bg-neon-green' : 'bg-neon-cyan/60'
+                      exp.active
+                        ? 'bg-neon-green'
+                        : exp.foundational
+                          ? 'bg-neon-violet/60'
+                          : 'bg-neon-cyan/60'
                     }`}
                   />
                 </div>

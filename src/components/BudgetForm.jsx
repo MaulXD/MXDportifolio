@@ -16,6 +16,12 @@ import {
 } from 'lucide-react'
 import WhatsAppIcon from './icons/WhatsAppIcon'
 import NeonSelectButton from './NeonSelectButton'
+import {
+  buildWhatsAppMessage,
+  validateForm,
+  STREAM_PACK_LABEL,
+  SITE_LABEL,
+} from '../lib/budgetFormUtils'
 
 /** Altere aqui: DDI + DDD + número, só dígitos (ex: 5582993554322) */
 const WHATSAPP_NUMBER = '5582993554322'
@@ -35,9 +41,6 @@ const SERVICE_OPTIONS = [
   { id: 'social', label: 'Posts & redes sociais', icon: Layers },
   { id: 'outro', label: 'Outro', icon: HelpCircle },
 ]
-
-const STREAM_PACK_LABEL = 'Stream pack'
-const SITE_LABEL = 'Site / Landing page'
 
 /** Subitens de Stream pack, comuns em briefings de streamers (Twitch/YouTube) */
 const STREAM_PACK_ITEMS = [
@@ -63,69 +66,6 @@ const FIELD_CLASS =
   'w-full rounded-xl border border-white/10 bg-bg-800/60 px-4 py-3 text-sm text-white placeholder:text-white/35 backdrop-blur-sm transition-all duration-300 focus:border-neon-cyan/50 focus:outline-none focus:ring-0 focus:shadow-[0_0_15px_rgba(14,165,233,0.25)]'
 
 const LABEL_CLASS = 'mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/50'
-
-function buildWhatsAppMessage(data) {
-  const {
-    fullName,
-    phone,
-    personType,
-    cnpj,
-    selectedServices,
-    siteType,
-    streamItems,
-    notes,
-  } = data
-
-  const lines = [
-    'Olá Raul! Gostaria de um orçamento.',
-    '',
-    `Nome: ${fullName.trim()}`,
-    `Telefone: ${phone.trim()}`,
-    `Tipo: ${personType === 'pj' ? 'Pessoa Jurídica' : 'Pessoa Física'}`,
-  ]
-
-  if (personType === 'pj') {
-    lines.push(`CNPJ: ${cnpj.trim()}`)
-  }
-
-  lines.push('', 'O que você precisa:')
-  selectedServices.forEach((item) => lines.push(`  • ${item}`))
-
-  if (selectedServices.includes(STREAM_PACK_LABEL)) {
-    lines.push('', 'Stream pack:')
-    streamItems.forEach((item) => lines.push(`  • ${item}`))
-  }
-
-  if (selectedServices.includes(SITE_LABEL) && siteType) {
-    lines.push('', 'Tipo de site:', `  • ${siteType}`)
-  }
-
-  if (notes.trim()) {
-    lines.push('', 'Observações:', notes.trim())
-  }
-
-  return lines.join('\n')
-}
-
-function validateForm(data) {
-  const next = {}
-  const hasStream = data.selectedServices.includes(STREAM_PACK_LABEL)
-  const hasSite = data.selectedServices.includes(SITE_LABEL)
-
-  if (!data.personType) next.personType = 'Selecione Pessoa Física ou Jurídica.'
-  if (data.personType === 'pj' && !data.cnpj.trim()) next.cnpj = 'Informe o CNPJ.'
-  if (!data.fullName.trim()) next.fullName = 'Informe seu nome completo.'
-  if (!data.phone.trim()) next.phone = 'Informe seu telefone.'
-  if (data.selectedServices.length === 0) {
-    next.selectedServices = 'Marque pelo menos um serviço.'
-  }
-  if (hasStream && data.streamItems.length === 0) {
-    next.streamItems = 'Selecione ao menos um item do stream pack.'
-  }
-  if (hasSite && !data.siteType) next.siteType = 'Selecione o tipo de site.'
-
-  return { valid: Object.keys(next).length === 0, errors: next }
-}
 
 function PersonTypeSelector({ value, onChange, error }) {
   return (
@@ -196,35 +136,6 @@ function MultiSelectChips({ items, selected, onToggle, error, hint, className = 
   )
 }
 
-function SingleSelectChips({ items, value, onChange, error, hint, className = '', accent = 'cyan' }) {
-  return (
-    <div className={className}>
-      {hint && <p className="mb-3 text-xs text-white/45">{hint}</p>}
-      <div className="grid gap-2 sm:grid-cols-2">
-        {items.map((item) => {
-          const label = typeof item === 'string' ? item : item.label
-          const id = typeof item === 'string' ? item : item.id
-          const active = value === label
-
-          return (
-            <NeonSelectButton
-              key={id}
-              active={active}
-              accent={accent}
-              onClick={() => {
-                onChange(label)
-              }}
-            >
-              <span className="leading-snug">{label}</span>
-            </NeonSelectButton>
-          )
-        })}
-      </div>
-      {error && <p className="mt-2 text-xs text-neon-pink">{error}</p>}
-    </div>
-  )
-}
-
 export default function BudgetForm() {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
@@ -234,7 +145,7 @@ export default function BudgetForm() {
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
   const [selectedServices, setSelectedServices] = useState([])
-  const [siteType, setSiteType] = useState('')
+  const [siteTypes, setSiteTypes] = useState([])
   const [streamItems, setStreamItems] = useState([])
   const [notes, setNotes] = useState('')
   const [errors, setErrors] = useState({})
@@ -250,13 +161,19 @@ export default function BudgetForm() {
     )
   }
 
+  const toggleSiteType = (label) => {
+    setSiteTypes((prev) =>
+      prev.includes(label) ? prev.filter((i) => i !== label) : [...prev, label],
+    )
+  }
+
   const toggleService = (label) => {
     setSelectedServices((prev) => {
       const isRemoving = prev.includes(label)
       const next = isRemoving ? prev.filter((i) => i !== label) : [...prev, label]
       if (isRemoving) {
         if (label === STREAM_PACK_LABEL) setStreamItems([])
-        if (label === SITE_LABEL) setSiteType('')
+        if (label === SITE_LABEL) setSiteTypes([])
       }
       return next
     })
@@ -264,7 +181,7 @@ export default function BudgetForm() {
       ...p,
       selectedServices: undefined,
       streamItems: undefined,
-      siteType: undefined,
+      siteTypes: undefined,
     }))
   }
 
@@ -274,7 +191,7 @@ export default function BudgetForm() {
     fullName,
     phone,
     selectedServices: [...selectedServices],
-    siteType,
+    siteTypes,
     streamItems: [...streamItems],
     notes,
   })
@@ -448,18 +365,18 @@ export default function BudgetForm() {
                 >
                   <p className={`${LABEL_CLASS} mb-0 flex items-center gap-2`}>
                     <Globe size={14} className="text-neon-cyan" />
-                    Tipo de site desejado <span className="text-neon-green">*</span>
+                    Tipos de site desejados <span className="text-neon-green">*</span>
                   </p>
-                  <SingleSelectChips
+                  <MultiSelectChips
                     items={SITE_TYPE_OPTIONS}
-                    value={siteType}
+                    selected={siteTypes}
                     accent="cyan"
-                    onChange={(label) => {
-                      setSiteType(label)
-                      if (errors.siteType) setErrors((p) => ({ ...p, siteType: undefined }))
+                    onToggle={(label) => {
+                      toggleSiteType(label)
+                      if (errors.siteTypes) setErrors((p) => ({ ...p, siteTypes: undefined }))
                     }}
-                    error={submitAttempted ? errors.siteType : ''}
-                    hint="Escolha o tipo de site para o orçamento."
+                    error={submitAttempted ? errors.siteTypes : ''}
+                    hint="Marque um ou mais tipos — por exemplo, landing + blog no mesmo briefing."
                     className="mt-3"
                   />
                 </motion.div>

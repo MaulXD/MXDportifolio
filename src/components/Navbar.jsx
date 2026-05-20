@@ -17,9 +17,6 @@ const SECTION_IDS = [...NAV_LINKS.map((l) => l.href.slice(1)), 'orcamento']
 
 const NAVBAR_SOLID = 'border-white/10 bg-bg-950'
 
-const MOBILE_MENU_PANEL =
-  'border border-white/10 bg-bg-950 shadow-[0_20px_50px_rgba(0,0,0,0.9)]'
-
 export default function Navbar() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -160,53 +157,45 @@ export default function Navbar() {
       </div>
 
       {menuOpen && (
-        <>
-          <div
-            className="fixed left-0 right-0 bottom-0 z-[99] bg-bg-950 md:hidden"
-            style={{ top: barHeight }}
-            onClick={() => setMenuOpen(false)}
-            onKeyDown={(e) => e.key === 'Escape' && setMenuOpen(false)}
-            role="presentation"
-            aria-hidden
-          />
-          <div
-            className={`absolute left-4 right-4 top-full z-[101] mt-2 overflow-hidden rounded-2xl ${MOBILE_MENU_PANEL} md:hidden`}
-          >
-            <nav className="flex flex-col bg-bg-950 p-2">
-              {NAV_LINKS.map((link) => {
-                const id = link.href.slice(1)
-                const isActive = activeSection === id
-                return (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      handleNavClick(link.href)
-                    }}
-                    className={`rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
-                      isActive
-                        ? 'bg-neon-green/20 text-neon-green'
-                        : 'text-white hover:bg-bg-800'
-                    }`}
-                  >
-                    {link.label}
-                  </a>
-                )
-              })}
-              <a
-                href="#orcamento"
-                onClick={(e) => {
-                  e.preventDefault()
-                  handleNavClick('#orcamento')
-                }}
-                className="mt-2 flex items-center justify-center rounded-xl bg-neon-green px-4 py-3.5 text-sm font-semibold text-bg-950 transition-shadow hover:shadow-[0_0_24px_rgba(0,255,157,0.35)]"
-              >
-                Solicitar Orçamento
-              </a>
-            </nav>
-          </div>
-        </>
+        <div
+          className="fixed inset-0 z-[101] flex flex-col bg-bg-950 md:hidden"
+          style={{ paddingTop: barHeight }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu de navegação"
+        >
+          <nav className="flex min-h-0 flex-1 flex-col divide-y divide-white/5 px-4">
+            {NAV_LINKS.map((link) => {
+              const id = link.href.slice(1)
+              const isActive = activeSection === id
+              return (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    handleNavClick(link.href)
+                  }}
+                  className={`flex flex-1 items-center justify-center px-4 text-base font-medium transition-colors ${
+                    isActive ? 'bg-neon-green/10 text-neon-green' : 'text-white active:bg-bg-800'
+                  }`}
+                >
+                  {link.label}
+                </a>
+              )
+            })}
+            <a
+              href="#orcamento"
+              onClick={(e) => {
+                e.preventDefault()
+                handleNavClick('#orcamento')
+              }}
+              className="flex flex-[1.15] items-center justify-center bg-neon-green/10 px-4 text-base font-semibold text-neon-green active:bg-neon-green/20"
+            >
+              Solicitar Orçamento
+            </a>
+          </nav>
+        </div>
       )}
     </header>
   )

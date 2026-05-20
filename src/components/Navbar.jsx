@@ -201,7 +201,7 @@ export default function Navbar() {
                 }}
                 className="mt-2 rounded-xl px-4 py-3.5 text-center text-base font-semibold active:opacity-80"
               >
-                Solicitar um <span className="text-neon">orçamento</span>
+                <span className="text-neon">Solicitar um orçamento</span>
               </a>
             </nav>
           </div>

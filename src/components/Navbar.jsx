@@ -157,45 +157,55 @@ export default function Navbar() {
       </div>
 
       {menuOpen && (
-        <div
-          className="fixed inset-0 z-[101] flex flex-col bg-bg-950 md:hidden"
-          style={{ paddingTop: barHeight }}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Menu de navegação"
-        >
-          <nav className="flex min-h-0 flex-1 flex-col divide-y divide-white/5 px-4">
-            {NAV_LINKS.map((link) => {
-              const id = link.href.slice(1)
-              const isActive = activeSection === id
-              return (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    handleNavClick(link.href)
-                  }}
-                  className={`flex flex-1 items-center justify-center px-4 text-base font-medium transition-colors ${
-                    isActive ? 'bg-neon-green/10 text-neon-green' : 'text-white active:bg-bg-800'
-                  }`}
-                >
-                  {link.label}
-                </a>
-              )
-            })}
-            <a
-              href="#orcamento"
-              onClick={(e) => {
-                e.preventDefault()
-                handleNavClick('#orcamento')
-              }}
-              className="flex flex-[1.15] items-center justify-center bg-neon-green/10 px-4 text-base font-semibold text-neon-green active:bg-neon-green/20"
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-[99] bg-black/90 backdrop-blur-md md:hidden"
+            onClick={() => setMenuOpen(false)}
+            aria-label="Fechar menu"
+          />
+          <div
+            className="pointer-events-none fixed inset-x-5 top-1/2 z-[101] -translate-y-1/2 md:hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu de navegação"
+          >
+            <nav
+              className="pointer-events-auto flex flex-col gap-0.5 rounded-2xl bg-bg-950/95 px-3 py-5 shadow-[0_24px_80px_rgba(0,0,0,0.85)]"
+              onClick={(e) => e.stopPropagation()}
             >
-              Solicitar Orçamento
-            </a>
-          </nav>
-        </div>
+              {NAV_LINKS.map((link) => {
+                const id = link.href.slice(1)
+                const isActive = activeSection === id
+                return (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      handleNavClick(link.href)
+                    }}
+                    className={`rounded-xl px-4 py-3.5 text-center text-base font-medium transition-colors ${
+                      isActive ? 'text-neon-green' : 'text-white/90 active:text-white'
+                    }`}
+                  >
+                    {link.label}
+                  </a>
+                )
+              })}
+              <a
+                href="#orcamento"
+                onClick={(e) => {
+                  e.preventDefault()
+                  handleNavClick('#orcamento')
+                }}
+                className="mt-2 rounded-xl px-4 py-3.5 text-center text-base font-semibold active:opacity-80"
+              >
+                Solicitar um <span className="text-neon">orçamento</span>
+              </a>
+            </nav>
+          </div>
+        </>
       )}
     </header>
   )

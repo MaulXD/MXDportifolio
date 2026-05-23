@@ -14,6 +14,7 @@ import { getPastaIconName } from '../src/lib/galeriaFolderMeta.js'
 const STUDIO_PASTA_ICONS = {
   Monitor: DesktopIcon,
   LayoutPanel: ThLargeIcon,
+  PanelsTopLeft: ThLargeIcon,
   Sparkles: SparklesIcon,
   Film: PlayIcon,
   Shapes: DocumentsIcon,

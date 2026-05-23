@@ -15,7 +15,7 @@ export const GALERIA_PASTA_PADRAO = 'Telas'
 
 export const PASTA_ICONE_OPTIONS = [
   { title: 'Telas (monitor)', value: 'Monitor' },
-  { title: 'Painéis', value: 'LayoutPanel' },
+  { title: 'Painéis', value: 'PanelsTopLeft' },
   { title: 'Transições', value: 'Sparkles' },
   { title: 'Vídeos', value: 'Film' },
   { title: 'Ícones / shapes', value: 'Shapes' },
@@ -29,7 +29,7 @@ export const PASTA_ICONE_OPTIONS = [
 /** Nome da pasta → ícone Lucide (fallback quando não há Sanity). */
 export const GALERIA_PASTA_LUCIDE = {
   Telas: 'Monitor',
-  Painéis: 'LayoutPanel',
+  Painéis: 'PanelsTopLeft',
   Transições: 'Sparkles',
   Vídeos: 'Film',
   Ícones: 'Shapes',
@@ -51,23 +51,31 @@ export function buildPastaIconMap(tipos = []) {
 }
 
 export function getPastaIconName(nome, iconMap = null, pastaIcone = null) {
-  if (typeof pastaIcone === 'string' && pastaIcone.trim()) return pastaIcone.trim()
+  if (typeof pastaIcone === 'string' && pastaIcone.trim()) {
+    return normalizeLucideIconKey(pastaIcone.trim())
+  }
 
   if (!nome || typeof nome !== 'string') return 'Folder'
   const trimmed = nome.trim()
 
-  if (iconMap && iconMap[trimmed]) return iconMap[trimmed]
+  if (iconMap && iconMap[trimmed]) return normalizeLucideIconKey(iconMap[trimmed])
 
-  if (GALERIA_PASTA_LUCIDE[trimmed]) return GALERIA_PASTA_LUCIDE[trimmed]
+  if (GALERIA_PASTA_LUCIDE[trimmed]) return normalizeLucideIconKey(GALERIA_PASTA_LUCIDE[trimmed])
 
   const lower = trimmed.toLowerCase()
   if (iconMap) {
     const fromMap = Object.entries(iconMap).find(([key]) => key.toLowerCase() === lower)
-    if (fromMap) return fromMap[1]
+    if (fromMap) return normalizeLucideIconKey(fromMap[1])
   }
 
   const found = Object.entries(GALERIA_PASTA_LUCIDE).find(([key]) => key.toLowerCase() === lower)
-  return found?.[1] ?? 'Folder'
+  return normalizeLucideIconKey(found?.[1] ?? 'Folder')
+}
+
+/** Chaves legadas salvas no Sanity → ícones válidos no lucide-react atual. */
+export function normalizeLucideIconKey(iconKey) {
+  if (iconKey === 'LayoutPanel') return 'PanelsTopLeft'
+  return iconKey || 'Folder'
 }
 
 export function mergePastaSugestoes(existingNames = [], tipos = []) {

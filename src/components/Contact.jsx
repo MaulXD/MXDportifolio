@@ -40,7 +40,7 @@ export default function Contact() {
   }, [])
 
   return (
-    <section id="contact" className="relative py-24 sm:py-32">
+    <section id="contact" className="section-padding relative">
       <motion.div
         className="pointer-events-none absolute inset-0 bg-gradient-to-t from-neon-green/[0.03] to-transparent"
         aria-hidden
@@ -140,7 +140,7 @@ export default function Contact() {
         </div>
       </motion.div>
 
-      <footer className="mt-20 border-t border-white/5 py-8">
+      <footer className="mt-20 border-t border-white/5 py-8 lg:mt-12 lg:py-6">
         <p className="text-center text-sm text-white/40">© 2026 Raul Luz</p>
       </footer>
     </section>

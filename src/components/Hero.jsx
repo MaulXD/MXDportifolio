@@ -55,7 +55,7 @@ export default function Hero() {
         />
       ))}
 
-      <div className="relative z-10 mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+      <motion.div className="relative z-10 mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
         <motion.div variants={CONTAINER} initial="hidden" animate="show" className="text-center">
           <motion.div variants={ITEM} className="mb-6 flex justify-center">
             {!logoError ? (
@@ -141,7 +141,7 @@ export default function Hero() {
             ))}
           </motion.div>
         </motion.div>
-      </div>
+      </motion.div>
 
       <motion.a
         href="#about"
@@ -162,3 +162,4 @@ export default function Hero() {
     </section>
   )
 }
+

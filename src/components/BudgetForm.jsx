@@ -220,7 +220,7 @@ export default function BudgetForm() {
       : ''
 
   return (
-    <section id="orcamento" className="relative py-24 sm:py-32">
+    <section id="orcamento" className="section-padding relative">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-neon-cyan/[0.03] via-transparent to-transparent" />
 
       <motion.div

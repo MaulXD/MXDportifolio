@@ -5,8 +5,8 @@ import {
   Folder,
   FolderOpen,
   Image as ImageIcon,
-  LayoutPanel,
   Monitor,
+  PanelsTopLeft,
   Shapes,
   Sparkles,
 } from 'lucide-react'
@@ -14,7 +14,8 @@ import { getPastaIconName } from '../lib/galeriaFolderMeta'
 
 const PASTA_LUCIDE_ICONS = {
   Monitor,
-  LayoutPanel,
+  LayoutPanel: PanelsTopLeft,
+  PanelsTopLeft,
   Sparkles,
   Film,
   Shapes,

@@ -1,9 +1,42 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Film, Image as ImageIcon } from 'lucide-react'
+import {
+  Bell,
+  ChevronLeft,
+  ChevronRight,
+  FileImage,
+  Film,
+  Folder,
+  FolderOpen,
+  Image as ImageIcon,
+  LayoutPanel,
+  Monitor,
+  Shapes,
+  Sparkles,
+} from 'lucide-react'
+import { getPastaIconName } from '../lib/galeriaFolderMeta'
 import { getGaleriaPastas, getMediaLabel } from '../lib/portfolioUtils'
 import { useLightMotion } from '../hooks/useLightMotion'
 import LoopVideo from './LoopVideo'
+
+const PASTA_LUCIDE_ICONS = {
+  Monitor,
+  LayoutPanel,
+  Sparkles,
+  Film,
+  Shapes,
+  Bell,
+  FileImage,
+  Image: ImageIcon,
+  Folder,
+  FolderOpen,
+}
+
+function PastaTabIcon({ nome, className }) {
+  const iconName = getPastaIconName(nome)
+  const Icon = PASTA_LUCIDE_ICONS[iconName] ?? Folder
+  return <Icon className={className} size={16} aria-hidden />
+}
 
 function ThumbButton({ item, index, active, onSelect }) {
   const isVideo = item.tipoMedia === 'Vídeo'
@@ -130,6 +163,15 @@ export default function ProjectGallery({
                     : 'border-white/10 bg-bg-800/50 text-white/55 hover:border-white/20 hover:text-white/80'
                 }`}
               >
+                <span
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${
+                    selected
+                      ? 'border-neon-green/30 bg-neon-green/15 text-neon-green'
+                      : 'border-white/10 bg-bg-900/80 text-white/50'
+                  }`}
+                >
+                  <PastaTabIcon nome={pasta} />
+                </span>
                 <span className="text-xs font-semibold sm:text-sm">{pasta}</span>
                 <span
                   className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${

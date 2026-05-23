@@ -47,11 +47,39 @@ export function normalizeCategory(category) {
   if (!category || typeof category !== 'string') return 'Motions'
   const trimmed = category.trim()
   if (LEGACY_CATEGORY_MAP[trimmed]) return LEGACY_CATEGORY_MAP[trimmed]
-  if (PORTFOLIO_CATEGORIES.includes(trimmed)) return trimmed
-  return 'Motions'
+  return trimmed
+}
+
+export function getStudioTabs(uniqueCategories = []) {
+  const extras = new Set()
+
+  for (const raw of uniqueCategories) {
+    const cat = normalizeCategory(raw)
+    if (cat && !PORTFOLIO_CATEGORIES.includes(cat)) extras.add(cat)
+  }
+
+  const extraList = [...extras].sort((a, b) => a.localeCompare(b, 'pt'))
+  return ['Todos', ...PORTFOLIO_CATEGORIES, ...extraList]
+}
+
+export function getCategoriesForProjects(projects) {
+  const extras = new Set()
+
+  for (const project of projects ?? []) {
+    const cat = normalizeCategory(project?.category)
+    if (cat && !PORTFOLIO_CATEGORIES.includes(cat)) extras.add(cat)
+  }
+
+  const extraList = [...extras].sort((a, b) => a.localeCompare(b, 'pt'))
+  return ['Todos', ...PORTFOLIO_CATEGORIES, ...extraList]
 }
 
 export function getCategoryMeta(category) {
   const normalized = normalizeCategory(category)
-  return CATEGORY_META[normalized] ?? CATEGORY_META.Motions
+  return (
+    CATEGORY_META[normalized] ?? {
+      iconName: 'LayoutGrid',
+      accent: 'neon-violet',
+    }
+  )
 }

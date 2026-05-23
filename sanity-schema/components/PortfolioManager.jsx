@@ -30,14 +30,13 @@ import {
 import { DragHandleIcon, EditIcon, RefreshIcon } from '@sanity/icons'
 import { useClient } from 'sanity'
 import { IntentLink } from 'sanity/router'
-import { getStudioCategoryIcon, STUDIO_TABS } from '../portfolioIcons.js'
+import { getStudioCategoryIcon } from '../portfolioIcons.js'
+import { getStudioTabs, normalizeCategory } from '../../src/lib/portfolioCategories.js'
 import {
   normalizeStudioProject,
   projectsForTab,
   sortByOrdem,
 } from '../studioProjectUtils.js'
-import { PORTFOLIO_CATEGORIES } from '../../src/lib/portfolioCategories.js'
-
 const MANAGER_QUERY = `*[_type == "portfolio"] {
   _id,
   title,
@@ -92,8 +91,14 @@ async function ensureOrderFields(client, projects) {
     })
   }
 
-  for (const cat of PORTFOLIO_CATEGORIES) {
-    const inCat = projects.filter((p) => p.category === cat)
+  const categoriesInUse = [
+    ...new Set(
+      projects.map((p) => normalizeCategory(p.category)).filter(Boolean),
+    ),
+  ]
+
+  for (const cat of categoriesInUse) {
+    const inCat = projects.filter((p) => normalizeCategory(p.category) === cat)
     if (!inCat.some((p) => typeof p.ordemCategoria !== 'number')) continue
     const sorted = sortByOrdem(inCat, cat)
     sorted.forEach((p, index) => {
@@ -232,6 +237,11 @@ export default function PortfolioManager() {
     load()
   }, [load])
 
+  const studioTabs = useMemo(
+    () => getStudioTabs(projects.map((p) => p.category).filter(Boolean)),
+    [projects],
+  )
+
   const tabProjects = useMemo(() => projectsForTab(projects, tab), [projects, tab])
 
   const sensors = useSensors(
@@ -325,13 +335,13 @@ export default function PortfolioManager() {
         )}
 
         <Flex gap={2} wrap="wrap">
-          {STUDIO_TABS.map((name) => {
+          {studioTabs.map((name) => {
             const Icon = getStudioCategoryIcon(name)
             const active = tab === name
             const count =
               name === 'Todos'
                 ? projects.length
-                : projects.filter((p) => p.category === name).length
+                : projects.filter((p) => normalizeCategory(p.category) === name).length
             return (
               <Button
                 key={name}

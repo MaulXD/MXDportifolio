@@ -1,10 +1,11 @@
 import {
   CATEGORIES,
+  getCategoriesForProjects,
   getCategoryMeta,
   normalizeCategory,
 } from './portfolioCategories'
 
-export { CATEGORIES, getCategoryMeta, normalizeCategory }
+export { CATEGORIES, getCategoriesForProjects, getCategoryMeta, normalizeCategory }
 
 export const accentMap = {
   'neon-violet': {

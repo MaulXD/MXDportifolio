@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import {
   Clapperboard,
@@ -15,9 +15,9 @@ import ProjectModal from './ProjectModal'
 import { usePortfolioProjects } from '../lib/usePortfolioProjects'
 import { useLightMotion } from '../hooks/useLightMotion'
 import {
-  CATEGORIES,
   accentMap,
   filterProjectsForView,
+  getCategoriesForProjects,
   getCategoryMeta,
   getGallerySummary,
 } from '../lib/portfolioUtils'
@@ -45,6 +45,7 @@ export default function Portfolio() {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
 
+  const categories = useMemo(() => getCategoriesForProjects(projects), [projects])
   const filtered = filterProjectsForView(projects, filter)
 
   const openProject = (project) => {
@@ -72,7 +73,7 @@ export default function Portfolio() {
         </h2>
 
         <motion.div className="mt-6 flex flex-wrap gap-2 sm:gap-2.5 lg:mt-5">
-          {CATEGORIES.map((cat) => {
+          {categories.map((cat) => {
             const isActive = filter === cat
             const Icon = getFilterIcon(cat)
             return (

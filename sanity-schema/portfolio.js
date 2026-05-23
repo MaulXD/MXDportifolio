@@ -56,7 +56,7 @@ export default {
       title: 'Tipo de projeto',
       type: 'string',
       description:
-        'Categoria do projeto: Motions, Streampacks, Sites, Ilustrações, Logotipos ou Banners e Folders.',
+        'Categoria do projeto (Motions, Streampacks, Sites, Ilustrações, Logotipos, Banners e Folders ou outra que você use no portfólio).',
       options: {
         list: PORTFOLIO_CATEGORY_OPTIONS,
         layout: 'dropdown',
@@ -109,7 +109,7 @@ export default {
       title: 'Galeria do Projeto',
       type: 'array',
       description:
-        'Organize em pastas (Telas, Painéis, Transições…). Arraste arquivos na pasta desejada.',
+        'Organize em pastas (Telas, Painéis, Transições, Alertas, Flyer animado…). Cada pasta aparece no site com ícone próprio.',
       of: [{ type: 'galeriaPasta' }],
       components: {
         input: GaleriaInput,

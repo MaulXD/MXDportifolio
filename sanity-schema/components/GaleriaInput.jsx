@@ -18,10 +18,10 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   AddIcon,
-  FolderIcon,
 } from '@sanity/icons'
 import { PatchEvent, set, useClient, useFormValue } from 'sanity'
-import { GALERIA_PASTA_PADRAO, GALERIA_PASTA_SUGESTOES } from '../galeriaFolders.js'
+import { GALERIA_PASTA_PADRAO, mergePastaSugestoes } from '../galeriaFolders.js'
+import { getStudioPastaIcon } from '../galeriaFolderIcons.js'
 
 const ACCEPT = 'video/webm,image/png,image/webp,.webm,.png,.webp'
 const ACCEPT_LABEL = '.webm · .png · .webp'
@@ -298,6 +298,7 @@ export default function GaleriaInput(props) {
   const [dragOver, setDragOver] = useState(false)
   const [error, setError] = useState(null)
   const [novaPastaNome, setNovaPastaNome] = useState('')
+  const [remotePastas, setRemotePastas] = useState([])
   const migratedRef = useRef(false)
 
   const capaMidiaKey = useFormValue(['capaMidiaKey'])
@@ -311,6 +312,19 @@ export default function GaleriaInput(props) {
     },
     [onChange],
   )
+
+  useEffect(() => {
+    let cancelled = false
+    client
+      .fetch('array::unique(*[_type == "portfolio"].galeria[].nome)')
+      .then((names) => {
+        if (!cancelled && Array.isArray(names)) setRemotePastas(names.filter(Boolean))
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [client])
 
   useEffect(() => {
     if (migratedRef.current || readOnly || !Array.isArray(value) || value.length === 0) return
@@ -499,9 +513,12 @@ export default function GaleriaInput(props) {
     return folder._key === firstVisibleFolder?._key && itemKey === firstItemKey
   }
 
-  const sugestoesDisponiveis = GALERIA_PASTA_SUGESTOES.filter(
-    (nome) => !folders.some((f) => f.nome.toLowerCase() === nome.toLowerCase()),
-  )
+  const sugestoesDisponiveis = useMemo(() => {
+    const existing = folders.map((f) => f.nome)
+    return mergePastaSugestoes([...existing, ...remotePastas]).filter(
+      (nome) => !folders.some((f) => f.nome.toLowerCase() === nome.toLowerCase()),
+    )
+  }, [folders, remotePastas])
 
   if (readOnly) {
     return (
@@ -514,11 +531,13 @@ export default function GaleriaInput(props) {
             Este campo está somente leitura. Confira permissões de Editor/Admin no Sanity.
           </Text>
         </Card>
-        {folders.map((folder) => (
+        {folders.map((folder) => {
+          const PastaIcon = getStudioPastaIcon(folder.nome)
+          return (
           <Card key={folder._key} padding={3} radius={2} border>
             <Stack space={3}>
               <Flex align="center" gap={2}>
-                <FolderIcon />
+                <PastaIcon />
                 <Text size={1} weight="semibold">
                   {folder.nome}
                 </Text>
@@ -535,7 +554,8 @@ export default function GaleriaInput(props) {
               </Grid>
             </Stack>
           </Card>
-        ))}
+          )
+        })}
       </Stack>
     )
   }
@@ -624,12 +644,16 @@ export default function GaleriaInput(props) {
         </Card>
       )}
 
-      {folders.map((folder, folderIndex) => (
+      {folders.map((folder) => {
+        const PastaIcon = getStudioPastaIcon(folder.nome)
+        return (
         <Card key={folder._key} padding={4} radius={2} border>
           <Stack space={4}>
             <Flex align="center" justify="space-between" gap={2} wrap="wrap">
               <Flex align="center" gap={2} flex={1} style={{ minWidth: 200 }}>
-                <FolderIcon style={{ flexShrink: 0 }} />
+                <Box style={{ flexShrink: 0, display: 'flex' }}>
+                  <PastaIcon />
+                </Box>
                 <TextInput
                   value={folder.nome}
                   onChange={(e) => renameFolder(folder._key, e.currentTarget.value)}
@@ -716,7 +740,8 @@ export default function GaleriaInput(props) {
             )}
           </Stack>
         </Card>
-      ))}
+        )
+      })}
     </Stack>
   )
 }

@@ -75,11 +75,12 @@ function inferLegenda(item) {
     .trim()
 }
 
-function mapGaleriaItem(item, pasta = 'Geral', exibirPasta = true) {
+function mapGaleriaItem(item, pasta = 'Geral', exibirPasta = true, pastaIcone = null) {
   if (!item || typeof item.mediaUrl !== 'string' || !item.mediaUrl.length) return null
   return {
     _key: item._key || null,
     pasta: pasta.trim() || 'Geral',
+    pastaIcone: typeof pastaIcone === 'string' && pastaIcone.trim() ? pastaIcone.trim() : null,
     exibirPasta: exibirPasta !== false,
     tipoMedia: inferTipoMedia(item),
     mediaUrl: item.mediaUrl,
@@ -100,14 +101,17 @@ export function flattenGaleriaEntries(entries) {
     return entries.flatMap((folder) => {
       const pasta = (folder.nome || 'Geral').trim() || 'Geral'
       const exibirPasta = folder.exibirNoSite !== false
+      const pastaIcone = folder.icone || null
       return (folder.itens || [])
-        .map((item) => mapGaleriaItem(item, pasta, exibirPasta))
+        .map((item) => mapGaleriaItem(item, pasta, exibirPasta, pastaIcone))
         .filter(Boolean)
     })
   }
 
   return entries
-    .map((item) => mapGaleriaItem(item, item.pasta || 'Geral', item.exibirPasta !== false))
+    .map((item) =>
+      mapGaleriaItem(item, item.pasta || 'Geral', item.exibirPasta !== false, item.pastaIcone),
+    )
     .filter(Boolean)
 }
 
@@ -120,16 +124,20 @@ export function getVisibleGaleria(galeria) {
 
 export function getGaleriaPastas(galeria) {
   const list = getVisibleGaleria(galeria)
-  const seen = new Set()
-  const pastas = []
+  const seen = new Map()
+
   for (const item of list) {
     const pasta = item?.pasta?.trim() || 'Geral'
     if (!seen.has(pasta)) {
-      seen.add(pasta)
-      pastas.push(pasta)
+      seen.set(pasta, item?.pastaIcone ?? null)
     }
   }
-  return pastas
+
+  return [...seen.entries()].map(([nome, icone]) => ({ nome, icone }))
+}
+
+export function getGaleriaPastaNames(galeria) {
+  return getGaleriaPastas(galeria).map((p) => p.nome)
 }
 
 export function normalizeProject(raw) {
@@ -223,7 +231,7 @@ export function getMediaLabel(item, index = 0) {
 export function getGallerySummary(galeria) {
   const list = Array.isArray(galeria) ? galeria : []
   const valid = getVisibleGaleria(list)
-  const pastas = getGaleriaPastas(list)
+  const pastas = getGaleriaPastaNames(list)
   const videos = valid.filter((item) => item?.tipoMedia === 'Vídeo').length
   const images = valid.filter((item) => item?.tipoMedia === 'Imagem').length
   const parts = []

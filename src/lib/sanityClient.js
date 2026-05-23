@@ -34,6 +34,7 @@ const PORTFOLIO_FIELDS = `{
   "galeriaEntries": galeria[]{
     _type,
     nome,
+    icone,
     exibirNoSite,
     itens[]{
       _key,
@@ -69,6 +70,13 @@ export const PORTFOLIO_QUERY = `*[_type == "portfolio"] | order(ordemGeral asc, 
 export const PROJECT_BY_SLUG_QUERY = `*[_type == "portfolio" && slug.current == $slug][0] ${PORTFOLIO_FIELDS}`
 
 export const PROJECT_BY_ID_QUERY = `*[_type == "portfolio" && _id == $id][0] ${PORTFOLIO_FIELDS}`
+
+export const GALERIA_PASTA_TIPOS_QUERY = `*[_type == "galeriaPastaTipo"] | order(ordem asc, nome asc) {
+  _id,
+  nome,
+  icone,
+  ordem
+}`
 
 export const PORTFOLIO_LOAD_ERROR_PUBLIC =
   'Não foi possível carregar os projetos. Tente novamente mais tarde.'

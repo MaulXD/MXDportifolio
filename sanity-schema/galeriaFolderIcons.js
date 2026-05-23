@@ -24,7 +24,12 @@ const STUDIO_PASTA_ICONS = {
   FolderOpen: FolderIcon,
 }
 
-export function getStudioPastaIcon(nome) {
-  const iconName = getPastaIconName(nome)
-  return STUDIO_PASTA_ICONS[iconName] ?? FolderIcon
+export function getStudioPastaIconByKey(iconKey) {
+  if (!iconKey) return FolderIcon
+  return STUDIO_PASTA_ICONS[iconKey] ?? FolderIcon
+}
+
+export function getStudioPastaIcon(nome, iconMap = null, pastaIcone = null) {
+  const iconName = getPastaIconName(nome, iconMap, pastaIcone)
+  return getStudioPastaIconByKey(iconName)
 }

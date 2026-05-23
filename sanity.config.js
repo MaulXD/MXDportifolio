@@ -2,6 +2,7 @@ import { defineConfig } from 'sanity'
 import { structureTool } from 'sanity/structure'
 import galeriaItem from './sanity-schema/galeriaItem.js'
 import galeriaPasta from './sanity-schema/galeriaPasta.js'
+import galeriaPastaTipo from './sanity-schema/galeriaPastaTipo.js'
 import portfolio from './sanity-schema/portfolio.js'
 import { structure } from './sanity-schema/structure.js'
 
@@ -12,6 +13,6 @@ export default defineConfig({
   dataset: 'production',
   plugins: [structureTool({ structure })],
   schema: {
-    types: [galeriaItem, galeriaPasta, portfolio],
+    types: [galeriaItem, galeriaPasta, galeriaPastaTipo, portfolio],
   },
 })

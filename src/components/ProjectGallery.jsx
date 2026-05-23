@@ -1,42 +1,12 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import {
-  Bell,
-  ChevronLeft,
-  ChevronRight,
-  FileImage,
-  Film,
-  Folder,
-  FolderOpen,
-  Image as ImageIcon,
-  LayoutPanel,
-  Monitor,
-  Shapes,
-  Sparkles,
-} from 'lucide-react'
-import { getPastaIconName } from '../lib/galeriaFolderMeta'
+import { ChevronLeft, ChevronRight, Film, Image as ImageIcon } from 'lucide-react'
+import { sortPastasByTipos } from '../lib/galeriaFolderMeta'
 import { getGaleriaPastas, getMediaLabel } from '../lib/portfolioUtils'
+import { useGaleriaPastaTipos } from '../hooks/useGaleriaPastaTipos'
 import { useLightMotion } from '../hooks/useLightMotion'
+import PastaTabIcon from './PastaTabIcon'
 import LoopVideo from './LoopVideo'
-
-const PASTA_LUCIDE_ICONS = {
-  Monitor,
-  LayoutPanel,
-  Sparkles,
-  Film,
-  Shapes,
-  Bell,
-  FileImage,
-  Image: ImageIcon,
-  Folder,
-  FolderOpen,
-}
-
-function PastaTabIcon({ nome, className }) {
-  const iconName = getPastaIconName(nome)
-  const Icon = PASTA_LUCIDE_ICONS[iconName] ?? Folder
-  return <Icon className={className} size={16} aria-hidden />
-}
 
 function ThumbButton({ item, index, active, onSelect }) {
   const isVideo = item.tipoMedia === 'Vídeo'
@@ -87,12 +57,24 @@ export default function ProjectGallery({
   accentClass = 'border-neon-green/30',
   compact = false,
 }) {
-  const pastas = useMemo(() => getGaleriaPastas(items), [items])
+  const { tipos, iconMap } = useGaleriaPastaTipos()
+  const pastasRaw = useMemo(() => getGaleriaPastas(items), [items])
+  const pastas = useMemo(() => {
+    const orderedNames = sortPastasByTipos(
+      pastasRaw.map((p) => p.nome),
+      tipos,
+    )
+    return orderedNames.map(
+      (nome) => pastasRaw.find((p) => p.nome === nome) ?? { nome, icone: null },
+    )
+  }, [pastasRaw, tipos])
   const showPastas = pastas.length > 1
-  const [activePasta, setActivePasta] = useState(pastas[0] ?? 'Geral')
+  const [activePasta, setActivePasta] = useState(pastas[0]?.nome ?? 'Geral')
   const [activeIndex, setActiveIndex] = useState(0)
   const lightMotion = useLightMotion()
   const stripRef = useRef(null)
+
+  const activePastaMeta = pastas.find((p) => p.nome === activePasta) ?? pastas[0]
 
   const filteredItems = showPastas
     ? items.filter((item) => (item.pasta || 'Geral') === activePasta)
@@ -102,7 +84,7 @@ export default function ProjectGallery({
   const count = filteredItems.length
 
   useEffect(() => {
-    setActivePasta(pastas[0] ?? 'Geral')
+    setActivePasta(pastas[0]?.nome ?? 'Geral')
     setActiveIndex(0)
   }, [items, pastas])
 
@@ -115,9 +97,9 @@ export default function ProjectGallery({
 
   if (!count || !current) {
     return (
-      <div className="flex min-h-[200px] w-full items-center justify-center rounded-xl border border-white/10 bg-bg-800/40">
+      <motion.div className="flex min-h-[200px] w-full items-center justify-center rounded-xl border border-white/10 bg-bg-800/40">
         <img src="/mxd-logo.png" alt="" className="h-14 w-14 rounded-full opacity-30" aria-hidden />
-      </div>
+      </motion.div>
     )
   }
 
@@ -140,14 +122,15 @@ export default function ProjectGallery({
   )
 
   return (
-    <div className={`flex w-full flex-col ${compact ? 'gap-3' : 'gap-4'}`}>
+    <motion.div className={`flex w-full flex-col ${compact ? 'gap-3' : 'gap-4'}`}>
       {showPastas && (
-        <div
+        <motion.div
           className="flex gap-2 overflow-x-auto pb-1"
           role="tablist"
           aria-label="Pastas da galeria"
         >
-          {pastas.map((pasta) => {
+          {pastas.map((pastaMeta) => {
+            const pasta = pastaMeta.nome
             const pastaCount = items.filter((it) => (it.pasta || 'Geral') === pasta).length
             const selected = pasta === activePasta
             return (
@@ -157,25 +140,31 @@ export default function ProjectGallery({
                 role="tab"
                 aria-selected={selected}
                 onClick={() => setActivePasta(pasta)}
-                className={`flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-left transition-colors ${
+                className={`flex shrink-0 items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-all ${
                   selected
-                    ? 'border-neon-green/40 bg-neon-green/10 text-white'
-                    : 'border-white/10 bg-bg-800/50 text-white/55 hover:border-white/20 hover:text-white/80'
+                    ? 'border-neon-green/50 bg-neon-green/10 text-white shadow-[0_0_20px_rgba(0,255,157,0.12)]'
+                    : 'border-white/10 bg-bg-800/50 text-white/55 hover:border-white/25 hover:text-white/85'
                 }`}
               >
                 <span
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${
                     selected
-                      ? 'border-neon-green/30 bg-neon-green/15 text-neon-green'
-                      : 'border-white/10 bg-bg-900/80 text-white/50'
+                      ? 'border-neon-green/40 bg-neon-green/20 text-neon-green'
+                      : 'border-white/10 bg-bg-950/90 text-white/60'
                   }`}
                 >
-                  <PastaTabIcon nome={pasta} />
+                  <PastaTabIcon
+                    nome={pasta}
+                    pastaIcone={pastaMeta.icone}
+                    iconMap={iconMap}
+                    size={20}
+                    strokeWidth={2.25}
+                  />
                 </span>
                 <span className="text-xs font-semibold sm:text-sm">{pasta}</span>
                 <span
-                  className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
-                    selected ? 'bg-neon-green/20 text-neon-green' : 'bg-white/5 text-white/40'
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums ${
+                    selected ? 'bg-neon-green/25 text-neon-green' : 'bg-white/5 text-white/40'
                   }`}
                 >
                   {pastaCount}
@@ -183,13 +172,13 @@ export default function ProjectGallery({
               </button>
             )
           })}
-        </div>
+        </motion.div>
       )}
 
-      <div
+      <motion.div
         className={`relative overflow-hidden rounded-2xl border bg-bg-950/80 ${accentClass}`}
       >
-        <div
+        <motion.div
           className={`relative flex items-center justify-center bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.04)_0%,_transparent_70%)] ${
             compact
               ? 'min-h-[140px] px-4 py-5 sm:px-6 sm:py-6'
@@ -218,7 +207,7 @@ export default function ProjectGallery({
           )}
 
           {lightMotion ? (
-            <div className="flex items-center justify-center">{mainMedia}</div>
+            <motion.div className="flex items-center justify-center">{mainMedia}</motion.div>
           ) : (
             <AnimatePresence mode="wait">
               <motion.div
@@ -233,14 +222,27 @@ export default function ProjectGallery({
               </motion.div>
             </AnimatePresence>
           )}
-        </div>
+        </motion.div>
 
-        <div
+        <motion.div
           className={`flex flex-wrap items-center justify-between gap-2 border-t border-white/10 bg-bg-900/60 ${
             compact ? 'px-3 py-2' : 'px-4 py-3'
           }`}
         >
-          <p className="min-w-0 flex-1 truncate text-sm font-medium text-white">{currentLabel}</p>
+          <p className="flex min-w-0 flex-1 items-center gap-2 truncate text-sm font-medium text-white">
+            {showPastas && (
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-white/10 bg-bg-950/80 text-neon-green">
+                <PastaTabIcon
+                  nome={activePasta}
+                  pastaIcone={activePastaMeta?.icone}
+                  iconMap={iconMap}
+                  size={14}
+                  strokeWidth={2.25}
+                />
+              </span>
+            )}
+            <span className="truncate">{currentLabel}</span>
+          </p>
           <p className="shrink-0 text-xs text-white/45">
             {activeIndex + 1} / {count}
             {showPastas && <span className="text-white/25"> · </span>}
@@ -248,18 +250,15 @@ export default function ProjectGallery({
             <span className="text-white/25"> · </span>
             {isVideo ? 'Vídeo' : 'Imagem'}
           </p>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {count > 1 && (
-        <div>
+        <motion.div>
           <p className="mb-2 text-[10px] font-medium uppercase tracking-widest text-white/35">
             Todas nesta pasta
           </p>
-          <div
-            ref={stripRef}
-            className="flex gap-2 overflow-x-auto pb-1"
-          >
+          <motion.div ref={stripRef} className="flex gap-2 overflow-x-auto pb-1">
             {filteredItems.map((item, i) => (
               <ThumbButton
                 key={`${item.mediaUrl}-${i}`}
@@ -269,9 +268,9 @@ export default function ProjectGallery({
                 onSelect={() => setActiveIndex(i)}
               />
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   )
 }

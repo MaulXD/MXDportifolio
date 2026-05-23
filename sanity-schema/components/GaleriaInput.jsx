@@ -20,8 +20,11 @@ import {
   AddIcon,
 } from '@sanity/icons'
 import { PatchEvent, set, useClient, useFormValue } from 'sanity'
-import { GALERIA_PASTA_PADRAO, mergePastaSugestoes } from '../galeriaFolders.js'
+import { GALERIA_PASTA_PADRAO, mergePastaSugestoes, buildPastaIconMap, getPastaIconName } from '../../src/lib/galeriaFolderMeta.js'
 import { getStudioPastaIcon } from '../galeriaFolderIcons.js'
+import { ensureGaleriaPastaTipos } from '../galeriaPastaTipoSeed.js'
+
+const PASTA_TIPOS_QUERY = `*[_type == "galeriaPastaTipo"] | order(ordem asc, nome asc) { nome, icone, ordem }`
 
 const ACCEPT = 'video/webm,image/png,image/webp,.webm,.png,.webp'
 const ACCEPT_LABEL = '.webm · .png · .webp'
@@ -105,6 +108,7 @@ function normalizeFolder(entry) {
     _type: 'galeriaPasta',
     _key: entry._key || newKey(),
     nome,
+    icone: entry.icone || getPastaIconName(nome),
     itens,
     exibirNoSite: entry.exibirNoSite !== false,
   }
@@ -130,6 +134,7 @@ function normalizeFolders(value) {
       _type: 'galeriaPasta',
       _key: newKey(),
       nome: 'Geral',
+      icone: 'FolderOpen',
       itens: items,
       exibirNoSite: true,
     },
@@ -298,13 +303,14 @@ export default function GaleriaInput(props) {
   const [dragOver, setDragOver] = useState(false)
   const [error, setError] = useState(null)
   const [novaPastaNome, setNovaPastaNome] = useState('')
-  const [remotePastas, setRemotePastas] = useState([])
+  const [pastaTipos, setPastaTipos] = useState([])
   const migratedRef = useRef(false)
 
   const capaMidiaKey = useFormValue(['capaMidiaKey'])
   const folders = useMemo(() => normalizeFolders(value), [value])
   const flatItems = useMemo(() => flattenItems(folders), [folders])
   const assetUrls = useAssetPreviewUrls(flatItems, client)
+  const iconMap = useMemo(() => buildPastaIconMap(pastaTipos), [pastaTipos])
 
   const emit = useCallback(
     (next) => {
@@ -315,12 +321,18 @@ export default function GaleriaInput(props) {
 
   useEffect(() => {
     let cancelled = false
-    client
-      .fetch('array::unique(*[_type == "portfolio"].galeria[].nome)')
-      .then((names) => {
-        if (!cancelled && Array.isArray(names)) setRemotePastas(names.filter(Boolean))
-      })
-      .catch(() => {})
+
+    async function loadTipos() {
+      try {
+        await ensureGaleriaPastaTipos(client)
+        const data = await client.fetch(PASTA_TIPOS_QUERY)
+        if (!cancelled) setPastaTipos(Array.isArray(data) ? data : [])
+      } catch {
+        if (!cancelled) setPastaTipos([])
+      }
+    }
+
+    loadTipos()
     return () => {
       cancelled = true
     }
@@ -358,13 +370,22 @@ export default function GaleriaInput(props) {
         return
       }
       setError(null)
+      const tipoMatch = pastaTipos.find((t) => t.nome?.toLowerCase() === trimmed.toLowerCase())
+      const icone = tipoMatch?.icone || getPastaIconName(trimmed, iconMap)
       updateFolders((prev) => [
         ...prev,
-        { _type: 'galeriaPasta', _key: newKey(), nome: trimmed, itens: [], exibirNoSite: true },
+        {
+          _type: 'galeriaPasta',
+          _key: newKey(),
+          nome: trimmed,
+          icone,
+          itens: [],
+          exibirNoSite: true,
+        },
       ])
       setNovaPastaNome('')
     },
-    [folders, updateFolders],
+    [folders, updateFolders, pastaTipos, iconMap],
   )
 
   const removeFolder = useCallback(
@@ -514,11 +535,11 @@ export default function GaleriaInput(props) {
   }
 
   const sugestoesDisponiveis = useMemo(() => {
-    const existing = folders.map((f) => f.nome)
-    return mergePastaSugestoes([...existing, ...remotePastas]).filter(
-      (nome) => !folders.some((f) => f.nome.toLowerCase() === nome.toLowerCase()),
-    )
-  }, [folders, remotePastas])
+    return mergePastaSugestoes(
+      folders.map((f) => f.nome),
+      pastaTipos,
+    ).filter((nome) => !folders.some((f) => f.nome.toLowerCase() === nome.toLowerCase()))
+  }, [folders, pastaTipos])
 
   if (readOnly) {
     return (
@@ -532,7 +553,7 @@ export default function GaleriaInput(props) {
           </Text>
         </Card>
         {folders.map((folder) => {
-          const PastaIcon = getStudioPastaIcon(folder.nome)
+          const PastaIcon = getStudioPastaIcon(folder.nome, iconMap, folder.icone)
           return (
           <Card key={folder._key} padding={3} radius={2} border>
             <Stack space={3}>
@@ -602,16 +623,20 @@ export default function GaleriaInput(props) {
               <Text size={0} muted>
                 Sugestões:
               </Text>
-              {sugestoesDisponiveis.map((nome) => (
+              {sugestoesDisponiveis.map((nome) => {
+                const SugIcon = getStudioPastaIcon(nome, iconMap)
+                return (
                 <Button
                   key={nome}
+                  icon={SugIcon}
                   text={nome}
                   mode="ghost"
                   fontSize={1}
                   padding={2}
                   onClick={() => addFolder(nome)}
                 />
-              ))}
+                )
+              })}
             </Flex>
           )}
         </Stack>
@@ -645,7 +670,7 @@ export default function GaleriaInput(props) {
       )}
 
       {folders.map((folder) => {
-        const PastaIcon = getStudioPastaIcon(folder.nome)
+        const PastaIcon = getStudioPastaIcon(folder.nome, iconMap, folder.icone)
         return (
         <Card key={folder._key} padding={4} radius={2} border>
           <Stack space={4}>

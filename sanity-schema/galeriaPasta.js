@@ -13,6 +13,13 @@ export default {
       validation: (Rule) => Rule.required().min(1).error('Informe o nome da pasta.'),
     },
     {
+      name: 'icone',
+      title: 'Ícone',
+      type: 'string',
+      description: 'Definido automaticamente ao criar a pasta a partir de um modelo.',
+      readOnly: true,
+    },
+    {
       name: 'itens',
       title: 'Arquivos',
       type: 'array',
@@ -29,12 +36,13 @@ export default {
   preview: {
     select: {
       nome: 'nome',
+      icone: 'icone',
       count: 'itens.length',
     },
-    prepare({ nome, count }) {
+    prepare({ nome, icone, count }) {
       return {
         title: nome || 'Pasta',
-        subtitle: `${count ?? 0} arquivo(s)`,
+        subtitle: `${icone ? `${icone} · ` : ''}${count ?? 0} arquivo(s)`,
       }
     },
   },

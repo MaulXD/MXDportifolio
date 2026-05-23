@@ -57,7 +57,7 @@ export default function Portfolio() {
   }
 
   return (
-    <section id="portfolio" className="section-padding relative">
+    <section id="portfolio" className="relative py-24 sm:py-32">
       <div
         ref={ref}
         className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8"
@@ -72,7 +72,7 @@ export default function Portfolio() {
           Projetos <span className="text-neon">selecionados</span>
         </h2>
 
-        <motion.div className="mt-6 flex flex-wrap gap-2 sm:gap-2.5 lg:mt-5">
+        <div className="mt-8 flex flex-wrap gap-2 sm:gap-2.5">
           {categories.map((cat) => {
             const isActive = filter === cat
             const Icon = getFilterIcon(cat)
@@ -111,23 +111,23 @@ export default function Portfolio() {
               </button>
             )
           })}
-        </motion.div>
+        </div>
 
         {loading && (
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 text-white/50 lg:mt-8">
+          <div className="mt-16 flex flex-col items-center justify-center gap-3 text-white/50">
             <Loader2 size={28} className="animate-spin text-neon-green" />
             <p className="text-sm">Carregando projetos…</p>
           </div>
         )}
 
         {error && !loading && (
-          <p className="mt-8 rounded-xl border border-neon-pink/20 bg-neon-pink/5 px-4 py-3 text-center text-sm text-neon-pink/90 lg:mt-6">
+          <p className="mt-10 rounded-xl border border-neon-pink/20 bg-neon-pink/5 px-4 py-3 text-center text-sm text-neon-pink/90">
             {error}
           </p>
         )}
 
         {!loading && filtered.length > 0 && (
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:mt-6 lg:grid-cols-3">
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((project) => {
               if (!project) return null
 

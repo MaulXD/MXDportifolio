@@ -21,7 +21,7 @@ export default function About() {
   const inView = useInView(ref, { once: true, margin: '-80px' })
 
   return (
-    <section id="about" className="section-padding relative">
+    <section id="about" className="relative py-24 sm:py-32">
       <motion.div
         ref={ref}
         initial={{ opacity: 0, y: 28 }}

@@ -65,7 +65,7 @@ export default function CreativeProcess() {
   const lightMotion = useLightMotion()
 
   return (
-    <section id="como-trabalho" className="section-padding relative border-t border-white/5">
+    <section id="como-trabalho" className="relative border-t border-white/5 py-20 sm:py-28">
       <motion.div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-neon-green/[0.02] via-transparent to-transparent" aria-hidden />
 
       <motion.div
@@ -80,7 +80,7 @@ export default function CreativeProcess() {
           No <span className="text-neon">detalhe</span>
         </h2>
 
-        <motion.div className="mt-6 flex flex-col gap-2.5 sm:gap-3 lg:mt-4">
+        <motion.div className="mt-6 flex flex-col gap-2.5 sm:gap-3">
           {PILLARS.map((pillar, i) => {
             const Icon = pillar.icon
 

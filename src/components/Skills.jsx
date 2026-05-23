@@ -60,7 +60,7 @@ export default function Skills() {
   const inView = useInView(ref, { once: true, margin: '-80px' })
 
   return (
-    <section id="skills" className="section-padding relative">
+    <section id="skills" className="relative py-24 sm:py-32">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-neon-green/[0.02] to-transparent" />
 
       <motion.div
@@ -78,7 +78,7 @@ export default function Skills() {
           Domínio técnico em quatro frentes criativas, do branding ao código.
         </p>
 
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:mt-6">
+        <div className="mt-12 grid gap-5 sm:grid-cols-2">
           {CATEGORIES.map((cat, i) => (
             <motion.div
               key={cat.title}

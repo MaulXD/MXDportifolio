@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Film, Image as ImageIcon } from 'lucide-react'
 import { sortPastasByTipos } from '../lib/galeriaFolderMeta'
-import { getGaleriaPastas, getMediaLabel } from '../lib/portfolioUtils'
+import { getGaleriaPastas, getGalleryDefaultSelection, getMediaLabel } from '../lib/portfolioUtils'
 import { useGaleriaPastaTipos } from '../hooks/useGaleriaPastaTipos'
 import { useLightMotion } from '../hooks/useLightMotion'
-import { drawItem, drawMedia, drawMediaLight, drawStagger } from '../lib/drawMotion'
+import { drawItem, drawMedia, drawStaggerFolders, drawStaggerThumbs } from '../lib/drawMotion'
 import DrawnBorder from './DrawnBorder'
 import PastaTabIcon from './PastaTabIcon'
 import LoopVideo from './LoopVideo'
@@ -133,6 +133,7 @@ export default function ProjectGallery({
   title,
   accentClass = 'border-neon-green/30',
   compact = false,
+  capaMidiaKey = null,
 }) {
   const { tipos, iconMap } = useGaleriaPastaTipos()
   const pastasRaw = useMemo(() => getGaleriaPastas(items), [items])
@@ -148,8 +149,12 @@ export default function ProjectGallery({
   const showPastas = pastas.length > 1
   const sidebarPastas = compact && showPastas
   const stageHeight = compact ? COMPACT_STAGE : FULL_STAGE
-  const [activePasta, setActivePasta] = useState(pastas[0]?.nome ?? 'Geral')
-  const [activeIndex, setActiveIndex] = useState(0)
+  const defaultSelection = useMemo(
+    () => getGalleryDefaultSelection(items, pastas, capaMidiaKey),
+    [items, pastas, capaMidiaKey],
+  )
+  const [activePasta, setActivePasta] = useState(defaultSelection.pasta)
+  const [activeIndex, setActiveIndex] = useState(defaultSelection.index)
   const lightMotion = useLightMotion()
   const stripRef = useRef(null)
 
@@ -161,12 +166,16 @@ export default function ProjectGallery({
 
   const current = filteredItems[activeIndex] ?? null
   const count = filteredItems.length
-  const mediaKey = `${activePasta}-${current?.mediaUrl ?? 'empty'}-${activeIndex}`
+  const galleryKey = useMemo(
+    () => items.map((item) => item.mediaUrl).join('|'),
+    [items],
+  )
 
   useEffect(() => {
-    setActivePasta(pastas[0]?.nome ?? 'Geral')
-    setActiveIndex(0)
-  }, [items, pastas])
+    const next = getGalleryDefaultSelection(items, pastas, capaMidiaKey)
+    setActivePasta(next.pasta)
+    setActiveIndex(next.index)
+  }, [galleryKey])
 
   useEffect(() => {
     setActiveIndex(0)
@@ -174,8 +183,6 @@ export default function ProjectGallery({
 
   const goPrev = () => setActiveIndex((i) => (i <= 0 ? count - 1 : i - 1))
   const goNext = () => setActiveIndex((i) => (i >= count - 1 ? 0 : i + 1))
-
-  const mediaTransition = lightMotion ? drawMediaLight : drawMedia
 
   if (!count || !current) {
     return (
@@ -199,7 +206,7 @@ export default function ProjectGallery({
       }
       role="tablist"
       aria-label="Pastas da galeria"
-      variants={lightMotion ? undefined : drawStagger}
+      variants={lightMotion ? undefined : drawStaggerFolders}
       initial={lightMotion ? false : 'initial'}
       animate={lightMotion ? false : 'animate'}
     >
@@ -243,12 +250,7 @@ export default function ProjectGallery({
     >
       {folderList}
 
-      <motion.div
-        className={`flex min-w-0 flex-1 flex-col ${compact ? 'gap-3' : 'gap-4'}`}
-        initial={lightMotion ? false : { opacity: 0 }}
-        animate={lightMotion ? false : { opacity: 1 }}
-        transition={{ duration: 0.45, delay: 0.12, ease: [0.33, 1, 0.45, 1] }}
-      >
+      <div className={`flex min-w-0 flex-1 flex-col ${compact ? 'gap-3' : 'gap-4'}`}>
         <motion.div
           className={`relative overflow-hidden rounded-2xl border bg-bg-950/80 ${accentClass}`}
         >
@@ -256,7 +258,10 @@ export default function ProjectGallery({
             <DrawnBorder stroke="rgba(0,255,157,0.35)" className="rounded-2xl" />
           )}
           <motion.div
-            className={`relative w-full bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.04)_0%,_transparent_70%)] ${stageHeight}`}
+            key={galleryKey}
+            className={`relative w-full overflow-hidden bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.04)_0%,_transparent_70%)] ${stageHeight}`}
+            initial={lightMotion ? false : drawMedia.initial}
+            animate={lightMotion ? false : drawMedia.animate}
           >
             {count > 1 && (
               <>
@@ -279,20 +284,14 @@ export default function ProjectGallery({
               </>
             )}
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={mediaKey}
-                className="absolute inset-0 flex items-center justify-center px-4 py-4 sm:px-6 sm:py-5"
-                {...mediaTransition}
-              >
-                <StageMedia
-                  current={current}
-                  title={title}
-                  currentLabel={currentLabel}
-                  isVideo={isVideo}
-                />
-              </motion.div>
-            </AnimatePresence>
+            <div className="absolute inset-0 flex items-center justify-center px-4 py-4 sm:px-6 sm:py-5">
+              <StageMedia
+                current={current}
+                title={title}
+                currentLabel={currentLabel}
+                isVideo={isVideo}
+              />
+            </div>
           </motion.div>
 
           <div
@@ -328,7 +327,7 @@ export default function ProjectGallery({
           {count > 1 ? (
             <motion.div
               key={activePasta}
-              variants={lightMotion ? undefined : drawStagger}
+              variants={lightMotion ? undefined : drawStaggerThumbs}
               initial={lightMotion ? false : 'initial'}
               animate={lightMotion ? false : 'animate'}
             >
@@ -360,7 +359,7 @@ export default function ProjectGallery({
             <div className={compact ? 'h-[96px]' : THUMB_ROW} aria-hidden />
           )}
         </div>
-      </motion.div>
+      </div>
     </div>
   )
 }

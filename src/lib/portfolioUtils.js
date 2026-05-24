@@ -140,6 +140,19 @@ export function getGaleriaPastaNames(galeria) {
   return getGaleriaPastas(galeria).map((p) => p.nome)
 }
 
+/** Pasta e índice iniciais da galeria — sempre a primeira pasta na ordem do projeto. */
+export function getGalleryDefaultSelection(items, orderedPastas = [], capaMidiaKey = null) {
+  const pasta = orderedPastas[0]?.nome ?? getGaleriaPastas(items)[0]?.nome ?? 'Geral'
+  const inPasta = items.filter((item) => (item.pasta || 'Geral') === pasta)
+
+  if (capaMidiaKey) {
+    const capaIdx = inPasta.findIndex((item) => item._key === capaMidiaKey)
+    if (capaIdx >= 0) return { pasta, index: capaIdx }
+  }
+
+  return { pasta, index: 0 }
+}
+
 export function normalizeProject(raw) {
   if (!raw || typeof raw !== 'object') return null
 

@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useRef, useMemo } from 'react'
+import { motion, AnimatePresence, useInView } from 'framer-motion'
 import {
   Clapperboard,
   PenTool,
@@ -13,7 +13,7 @@ import {
 import { PortfolioCardMedia } from './GalleryMedia'
 import ProjectModal from './ProjectModal'
 import { usePortfolioProjects } from '../lib/usePortfolioProjects'
-import { useDrawInView } from '../hooks/useDrawInView'
+import { useLightMotion } from '../hooks/useLightMotion'
 import {
   accentMap,
   filterProjectsForView,
@@ -40,37 +40,39 @@ function getFilterIcon(cat) {
 export default function Portfolio() {
   const [filter, setFilter] = useState('Todos')
   const [selectedProject, setSelectedProject] = useState(null)
-  const [modalOpen, setModalOpen] = useState(false)
   const { projects, loading, error } = usePortfolioProjects()
-  const { ref, stagger, item, block, lightMotion } = useDrawInView()
+  const lightMotion = useLightMotion()
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true, margin: '-80px' })
 
   const categories = useMemo(() => getCategoriesForProjects(projects), [projects])
   const filtered = filterProjectsForView(projects, filter)
 
   const openProject = (project) => {
     setSelectedProject(project)
-    setModalOpen(true)
   }
 
   const closeProject = () => {
-    setModalOpen(false)
-  }
-
-  const clearProject = () => {
     setSelectedProject(null)
   }
 
   return (
     <section id="portfolio" className="relative py-24 sm:py-32">
-      <motion.div ref={ref} {...stagger} className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <motion.div {...item}>
-          <span className="section-label">Portfólio</span>
-          <h2 className="section-heading">
-            Projetos <span className="text-neon">selecionados</span>
-          </h2>
-        </motion.div>
+      <div
+        ref={ref}
+        className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8"
+        style={
+          lightMotion
+            ? undefined
+            : { opacity: inView ? 1 : 0, transform: inView ? 'translateY(0)' : 'translateY(28px)', transition: 'opacity 0.6s ease, transform 0.6s ease' }
+        }
+      >
+        <span className="section-label">Portfólio</span>
+        <h2 className="section-heading">
+          Projetos <span className="text-neon">selecionados</span>
+        </h2>
 
-        <motion.div {...block} className="mt-8 flex flex-wrap gap-2 sm:gap-2.5">
+        <div className="mt-8 flex flex-wrap gap-2 sm:gap-2.5">
           {categories.map((cat) => {
             const isActive = filter === cat
             const Icon = getFilterIcon(cat)
@@ -109,7 +111,7 @@ export default function Portfolio() {
               </button>
             )
           })}
-        </motion.div>
+        </div>
 
         {loading && (
           <div className="mt-16 flex flex-col items-center justify-center gap-3 text-white/50">
@@ -125,7 +127,7 @@ export default function Portfolio() {
         )}
 
         {!loading && filtered.length > 0 && (
-          <motion.div {...stagger} className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((project) => {
               if (!project) return null
 
@@ -135,9 +137,8 @@ export default function Portfolio() {
               const { valid, label } = getGallerySummary(project.galeria)
 
               return (
-                <motion.article
+                <article
                   key={project._id}
-                  {...item}
                   className={`group relative overflow-hidden rounded-2xl border border-white/5 bg-bg-800/60 transition-all duration-300 ${styles.border} ${lightMotion ? '' : styles.glow} ${lightMotion ? 'active:scale-[0.98]' : 'hover:-translate-y-1.5'}`}
                 >
                   <button
@@ -184,21 +185,21 @@ export default function Portfolio() {
                       />
                     </div>
                   </button>
-                </motion.article>
+                </article>
               )
             })}
-          </motion.div>
+          </div>
         )}
-      </motion.div>
+      </div>
 
-      <AnimatePresence mode="wait" onExitComplete={clearProject}>
-        {modalOpen && selectedProject ? (
+      <AnimatePresence>
+        {selectedProject && (
           <ProjectModal
             key={selectedProject._id}
             project={selectedProject}
             onClose={closeProject}
           />
-        ) : null}
+        )}
       </AnimatePresence>
     </section>
   )

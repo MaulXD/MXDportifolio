@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useInView } from 'framer-motion'
 import {
   Send,
   User,
@@ -16,7 +16,6 @@ import {
 } from 'lucide-react'
 import WhatsAppIcon from './icons/WhatsAppIcon'
 import NeonSelectButton from './NeonSelectButton'
-import { useDrawInView } from '../hooks/useDrawInView'
 import {
   buildWhatsAppMessage,
   validateForm,
@@ -138,7 +137,8 @@ function MultiSelectChips({ items, selected, onToggle, error, hint, className = 
 }
 
 export default function BudgetForm() {
-  const { ref, stagger, item, block } = useDrawInView()
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true, margin: '-80px' })
 
   const [personType, setPersonType] = useState('')
   const [cnpj, setCnpj] = useState('')
@@ -223,22 +223,28 @@ export default function BudgetForm() {
     <section id="orcamento" className="relative py-24 sm:py-32">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-neon-cyan/[0.03] via-transparent to-transparent" />
 
-      <motion.div ref={ref} {...stagger} className="relative mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
-        <motion.div {...item}>
-          <span className="section-label">Orçamento</span>
-          <h2 className="section-heading">
-            Solicite um <span className="text-neon">orçamento</span>
-          </h2>
-          <p className="mt-4 text-white/50">
-            Preencha seus dados, escolha o que você precisa e clique em enviar. Vamos abrir o WhatsApp
-            com sua mensagem pronta. É só conferir e mandar.
-          </p>
-        </motion.div>
+      <motion.div
+        ref={ref}
+        initial={{ opacity: 0, y: 28 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.6 }}
+        className="relative mx-auto max-w-2xl px-4 sm:px-6 lg:px-8"
+      >
+        <span className="section-label">Orçamento</span>
+        <h2 className="section-heading">
+          Solicite um <span className="text-neon">orçamento</span>
+        </h2>
+        <p className="mt-4 text-white/50">
+          Preencha seus dados, escolha o que você precisa e clique em enviar. Vamos abrir o WhatsApp
+          com sua mensagem pronta. É só conferir e mandar.
+        </p>
 
         <motion.form
           onSubmit={handleSubmit}
           noValidate
-          {...block}
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.15 }}
           className="mt-10 rounded-2xl border border-white/10 bg-bg-950/85 p-6 backdrop-blur-md sm:p-8"
         >
           <div className="space-y-5">

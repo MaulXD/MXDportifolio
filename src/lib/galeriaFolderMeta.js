@@ -113,12 +113,21 @@ export function sortPastasByTipos(pastaNames, tipos = []) {
     if (nome) orderMap.set(nome.toLowerCase(), typeof tipo.ordem === 'number' ? tipo.ordem : index)
   })
 
+  // Antes do Sanity carregar, usa a ordem padrão (Telas, Painéis…) — evita abrir em Flyer etc.
+  if (orderMap.size === 0) {
+    GALERIA_PASTA_SUGESTOES.forEach((nome, index) => {
+      orderMap.set(nome.toLowerCase(), index)
+    })
+  }
+
+  const originalIndex = new Map(pastaNames.map((name, index) => [name.toLowerCase(), index]))
+
   return [...pastaNames].sort((a, b) => {
     const oa = orderMap.get(a.toLowerCase())
     const ob = orderMap.get(b.toLowerCase())
     if (typeof oa === 'number' && typeof ob === 'number' && oa !== ob) return oa - ob
     if (typeof oa === 'number' && typeof ob !== 'number') return -1
     if (typeof oa !== 'number' && typeof ob === 'number') return 1
-    return a.localeCompare(b, 'pt')
+    return (originalIndex.get(a.toLowerCase()) ?? 0) - (originalIndex.get(b.toLowerCase()) ?? 0)
   })
 }

@@ -1,8 +1,7 @@
-import { useState, useCallback } from 'react'
-import { motion } from 'framer-motion'
+import { useRef, useState, useCallback } from 'react'
+import { motion, useInView } from 'framer-motion'
 import { Mail, Phone, Check } from 'lucide-react'
 import WhatsAppIcon from './icons/WhatsAppIcon'
-import { useDrawInView } from '../hooks/useDrawInView'
 
 const WHATSAPP_URL = 'https://wa.me/5582993554322'
 const PHONE_ID = 'phone'
@@ -26,7 +25,8 @@ const EMAIL_CHANNELS = [
 ]
 
 export default function Contact() {
-  const { ref, stagger, item, block } = useDrawInView()
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true, margin: '-80px' })
   const [copiedId, setCopiedId] = useState(null)
 
   const copyText = useCallback(async (id, text) => {
@@ -41,28 +41,37 @@ export default function Contact() {
 
   return (
     <section id="contact" className="relative py-24 sm:py-32">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-neon-green/[0.03] to-transparent" aria-hidden />
+      <motion.div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-neon-green/[0.03] to-transparent"
+        aria-hidden
+      />
 
-      <motion.div ref={ref} {...stagger} className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <motion.div {...item}>
-          <span className="section-label">Contato</span>
-          <h2 className="section-heading">
-            Vamos <span className="text-neon">criar juntos</span>
-          </h2>
-          <p className="mt-4 max-w-xl text-white/50">
-            Tem um projeto em mente? Entre em contato. Respondo o mais rápido possível.
-          </p>
-        </motion.div>
+      <motion.div
+        ref={ref}
+        initial={{ opacity: 0, y: 28 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.6 }}
+        className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8"
+      >
+        <span className="section-label">Contato</span>
+        <h2 className="section-heading">
+          Vamos <span className="text-neon">criar juntos</span>
+        </h2>
+        <p className="mt-4 max-w-xl text-white/50">
+          Tem um projeto em mente? Entre em contato. Respondo o mais rápido possível.
+        </p>
 
-        <motion.div {...block} className="mt-8 flex w-full max-w-[17.5rem] flex-col gap-2 sm:max-w-[18.5rem]">
-          {EMAIL_CHANNELS.map((channel) => {
+        <div className="mt-8 flex w-full max-w-[17.5rem] flex-col gap-2 sm:max-w-[18.5rem]">
+          {EMAIL_CHANNELS.map((channel, i) => {
             const copied = copiedId === channel.id
             return (
               <motion.button
                 key={channel.id}
                 type="button"
                 onClick={() => copyText(channel.id, channel.value)}
-                {...item}
+                initial={{ opacity: 0, y: 20 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ delay: 0.15 + i * 0.08 }}
                 whileHover={{ y: -4 }}
                 className="glass-hover group flex w-full items-center gap-3 rounded-xl px-5 py-3.5 text-left sm:px-6"
                 aria-label={`Copiar ${channel.label}: ${channel.value}`}
@@ -89,7 +98,12 @@ export default function Contact() {
             )
           })}
 
-          <motion.div {...item} className="glass-hover group flex w-full items-center gap-2 rounded-xl px-5 py-3.5 sm:gap-3 sm:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.15 + EMAIL_CHANNELS.length * 0.08 }}
+            className="glass-hover group flex w-full items-center gap-2 rounded-xl px-5 py-3.5 sm:gap-3 sm:px-6"
+          >
             <button
               type="button"
               onClick={() => copyText(PHONE_ID, PHONE_DISPLAY)}
@@ -123,7 +137,7 @@ export default function Contact() {
               <WhatsAppIcon size={20} />
             </a>
           </motion.div>
-        </motion.div>
+        </div>
       </motion.div>
 
       <footer className="mt-20 border-t border-white/5 py-8">

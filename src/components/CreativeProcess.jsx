@@ -1,6 +1,7 @@
-import { motion } from 'framer-motion'
+import { useRef } from 'react'
+import { motion, useInView } from 'framer-motion'
 import { Lightbulb, Layers, Briefcase, Sparkles } from 'lucide-react'
-import { useDrawInView } from '../hooks/useDrawInView'
+import { useLightMotion } from '../hooks/useLightMotion'
 
 const DOT_COLORS = {
   'neon-green': '#00FF9D',
@@ -9,6 +10,7 @@ const DOT_COLORS = {
   'neon-amber': '#F59E0B',
 }
 
+/** Resumo curto por card — sem listas longas para leitura rápida no mobile */
 const PILLARS = [
   {
     id: 'processo',
@@ -58,31 +60,44 @@ const HOVER_IN =
 const HOVER_OUT = '[transition:transform_0s,box-shadow_0s,opacity_0s]'
 
 export default function CreativeProcess() {
-  const { ref, stagger, item } = useDrawInView()
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true, margin: '-80px' })
+  const lightMotion = useLightMotion()
 
   return (
     <section id="como-trabalho" className="relative border-t border-white/5 py-20 sm:py-28">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-neon-green/[0.02] via-transparent to-transparent" aria-hidden />
+      <motion.div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-neon-green/[0.02] via-transparent to-transparent" aria-hidden />
 
-      <motion.div ref={ref} {...stagger} className="relative mx-auto max-w-2xl px-4 sm:max-w-3xl sm:px-6">
-        <motion.div {...item}>
-          <span className="section-label">Como trabalho</span>
-          <h2 className="section-heading">
-            No <span className="text-neon">detalhe</span>
-          </h2>
-        </motion.div>
+      <motion.div
+        ref={ref}
+        initial={lightMotion ? false : { opacity: 0, y: 28 }}
+        animate={lightMotion ? { opacity: 1, y: 0 } : inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.6 }}
+        className="relative mx-auto max-w-2xl px-4 sm:max-w-3xl sm:px-6"
+      >
+        <span className="section-label">Como trabalho</span>
+        <h2 className="section-heading">
+          No <span className="text-neon">detalhe</span>
+        </h2>
 
-        <div className="mt-6 flex flex-col gap-2.5 sm:gap-3">
-          {PILLARS.map((pillar) => {
+        <motion.div className="mt-6 flex flex-col gap-2.5 sm:gap-3">
+          {PILLARS.map((pillar, i) => {
             const Icon = pillar.icon
 
             return (
               <motion.article
                 key={pillar.id}
-                {...item}
+                initial={lightMotion ? false : { opacity: 0, y: 12 }}
+                animate={
+                  lightMotion ? { opacity: 1, y: 0 } : inView ? { opacity: 1, y: 0 } : {}
+                }
+                transition={{
+                  duration: lightMotion ? 0.2 : 0.45,
+                  delay: lightMotion ? 0 : 0.08 + i * 0.06,
+                }}
                 className={`group relative overflow-hidden rounded-lg border border-white/5 bg-bg-800/50 p-3.5 sm:p-4 ${HOVER_OUT} ${HOVER_IN} ${pillar.hoverBorder}`}
               >
-                <motion.div
+                <div
                   className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${pillar.bg} to-transparent opacity-0 group-hover:opacity-100 ${HOVER_OUT} group-hover:[transition:opacity_0.2s_ease-out]`}
                 />
 
@@ -104,7 +119,7 @@ export default function CreativeProcess() {
               </motion.article>
             )
           })}
-        </div>
+        </motion.div>
       </motion.div>
     </section>
   )

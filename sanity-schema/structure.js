@@ -17,7 +17,7 @@ export const structure = (S) =>
         .schemaType('galeriaPastaTipo')
         .child(S.documentTypeList('galeriaPastaTipo').title('Pastas da galeria')),
       S.listItem()
-        .title('Projetos — editar detalhes')
+        .title('Projetos: editar detalhes')
         .schemaType('portfolio')
         .child(S.documentTypeList('portfolio').title('Projetos')),
     ])

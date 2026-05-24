@@ -376,7 +376,7 @@ export default function BudgetForm() {
                       if (errors.siteTypes) setErrors((p) => ({ ...p, siteTypes: undefined }))
                     }}
                     error={submitAttempted ? errors.siteTypes : ''}
-                    hint="Marque um ou mais tipos — por exemplo, landing + blog no mesmo briefing."
+                    hint="Marque um ou mais tipos, por exemplo, landing + blog no mesmo briefing."
                     className="mt-3"
                   />
                 </motion.div>

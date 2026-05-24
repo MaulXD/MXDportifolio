@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Film, Image as ImageIcon } from 'lucide-react'
 import { sortPastasByTipos } from '../lib/galeriaFolderMeta'
 import { getGaleriaPastas, getGalleryDefaultSelection, getMediaLabel } from '../lib/portfolioUtils'
 import { useGaleriaPastaTipos } from '../hooks/useGaleriaPastaTipos'
 import { useLightMotion } from '../hooks/useLightMotion'
-import { drawItem, drawMedia, drawStaggerFolders, drawStaggerThumbs } from '../lib/drawMotion'
+import { drawItem, drawMedia, drawMediaSwitch, drawMediaSwitchLight, drawStaggerFolders, drawStaggerThumbs } from '../lib/drawMotion'
 import DrawnBorder from './DrawnBorder'
 import PastaTabIcon from './PastaTabIcon'
 import LoopVideo from './LoopVideo'
@@ -166,6 +166,8 @@ export default function ProjectGallery({
 
   const current = filteredItems[activeIndex] ?? null
   const count = filteredItems.length
+  const mediaKey = `${activePasta}-${current?.mediaUrl ?? 'empty'}-${activeIndex}`
+  const mediaSwitch = lightMotion ? drawMediaSwitchLight : drawMediaSwitch
   const galleryKey = useMemo(
     () => items.map((item) => item.mediaUrl).join('|'),
     [items],
@@ -284,14 +286,23 @@ export default function ProjectGallery({
               </>
             )}
 
-            <div className="absolute inset-0 flex items-center justify-center px-4 py-4 sm:px-6 sm:py-5">
-              <StageMedia
-                current={current}
-                title={title}
-                currentLabel={currentLabel}
-                isVideo={isVideo}
-              />
-            </div>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={mediaKey}
+                className="absolute inset-0 flex items-center justify-center px-4 py-4 sm:px-6 sm:py-5"
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={mediaSwitch}
+              >
+                <StageMedia
+                  current={current}
+                  title={title}
+                  currentLabel={currentLabel}
+                  isVideo={isVideo}
+                />
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
 
           <div

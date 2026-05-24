@@ -112,3 +112,16 @@ export const drawFade = {
   animate: { opacity: 1, transition: { duration: 0.5, ease: DRAW_EASE } },
   exit: { opacity: 0, transition: { duration: 0.38, ease: DRAW_EASE_OUT } },
 }
+
+/** Fade ao trocar mídia na galeria (não na abertura inicial). */
+export const drawMediaSwitch = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1, transition: { duration: 0.3, ease: DRAW_EASE } },
+  exit: { opacity: 0, transition: { duration: 0.22, ease: DRAW_EASE_OUT } },
+}
+
+export const drawMediaSwitchLight = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1, transition: { duration: 0.18 } },
+  exit: { opacity: 0, transition: { duration: 0.14 } },
+}

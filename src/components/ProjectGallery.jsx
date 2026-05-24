@@ -5,7 +5,7 @@ import { sortPastasByTipos } from '../lib/galeriaFolderMeta'
 import { getGaleriaPastas, getGalleryDefaultSelection, getMediaLabel } from '../lib/portfolioUtils'
 import { useGaleriaPastaTipos } from '../hooks/useGaleriaPastaTipos'
 import { useLightMotion } from '../hooks/useLightMotion'
-import { drawItem, drawMedia, drawMediaSwitch, drawMediaSwitchLight, drawStaggerFolders, drawStaggerThumbs } from '../lib/drawMotion'
+import { drawItem, drawMedia, drawMediaSwitch, drawStaggerFolders, drawStaggerThumbs } from '../lib/drawMotion'
 import DrawnBorder from './DrawnBorder'
 import PastaTabIcon from './PastaTabIcon'
 import LoopVideo from './LoopVideo'
@@ -14,7 +14,7 @@ const COMPACT_STAGE = 'h-[280px] sm:h-[320px]'
 const FULL_STAGE = 'h-[min(50vh,420px)] min-h-[320px]'
 const THUMB_ROW = 'h-[72px]'
 
-function ThumbButton({ item, index, active, onSelect }) {
+function ThumbButton({ item, index, active, onSelect, lightMotion }) {
   const isVideo = item.tipoMedia === 'Vídeo'
   const label = getMediaLabel(item, index)
 
@@ -33,15 +33,25 @@ function ThumbButton({ item, index, active, onSelect }) {
     >
       <div className="flex h-full w-full items-center justify-center p-1.5">
         {isVideo ? (
-          <LoopVideo
-            src={item.mediaUrl}
-            className="max-h-full max-w-full object-contain rounded-lg"
-          />
+          <div className="relative flex h-full w-full items-center justify-center">
+            <LoopVideo
+              src={item.mediaUrl}
+              autoPlay={false}
+              preload="metadata"
+              className="max-h-full max-w-full object-contain rounded-lg opacity-80"
+            />
+            <Film
+              size={lightMotion ? 14 : 12}
+              className="pointer-events-none absolute text-white/55"
+              aria-hidden
+            />
+          </div>
         ) : (
           <img
             src={item.mediaUrl}
             alt=""
             loading="lazy"
+            decoding="async"
             className="max-h-full max-w-full object-contain rounded-lg"
           />
         )}
@@ -110,12 +120,19 @@ function PastaFolderButton({ pastaMeta, pastaCount, selected, iconMap, onSelect,
   )
 }
 
-function StageMedia({ current, title, currentLabel, isVideo }) {
+function StageMedia({ current, title, currentLabel, isVideo, lightMotion }) {
   const mediaClass =
     'max-h-full max-w-full object-contain object-center rounded-xl ring-1 ring-white/[0.06]'
 
   if (isVideo) {
-    return <LoopVideo key={current.mediaUrl} src={current.mediaUrl} className={mediaClass} />
+    return (
+      <LoopVideo
+        key={current.mediaUrl}
+        src={current.mediaUrl}
+        className={mediaClass}
+        preload={lightMotion ? 'metadata' : 'auto'}
+      />
+    )
   }
 
   return (
@@ -124,6 +141,7 @@ function StageMedia({ current, title, currentLabel, isVideo }) {
       src={current.mediaUrl}
       alt={title ? `${title}: ${currentLabel}` : currentLabel}
       className={mediaClass}
+      decoding="async"
     />
   )
 }
@@ -167,7 +185,8 @@ export default function ProjectGallery({
   const current = filteredItems[activeIndex] ?? null
   const count = filteredItems.length
   const mediaKey = `${activePasta}-${current?.mediaUrl ?? 'empty'}-${activeIndex}`
-  const mediaSwitch = lightMotion ? drawMediaSwitchLight : drawMediaSwitch
+  const navBtnClass =
+    'absolute top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-bg-900/95 text-white/80 transition-colors hover:border-white/25 hover:text-white'
   const galleryKey = useMemo(
     () => items.map((item) => item.mediaUrl).join('|'),
     [items],
@@ -200,6 +219,39 @@ export default function ProjectGallery({
   const currentLabel = getMediaLabel(current, activeIndex)
 
   const folderList = showPastas ? (
+    lightMotion ? (
+      <div
+        className={
+          sidebarPastas
+            ? `flex shrink-0 flex-col gap-1.5 sm:w-44 sm:overflow-y-auto sm:pr-1 ${stageHeight}`
+            : 'flex gap-2 overflow-x-auto pb-1'
+        }
+        role="tablist"
+        aria-label="Pastas da galeria"
+      >
+        {sidebarPastas && (
+          <p className="mb-0.5 hidden shrink-0 px-1 text-[10px] font-medium uppercase tracking-widest text-white/35 sm:block">
+            Pastas
+          </p>
+        )}
+        {pastas.map((pastaMeta) => {
+          const pasta = pastaMeta.nome
+          const pastaCount = items.filter((it) => (it.pasta || 'Geral') === pasta).length
+          return (
+            <div key={pasta}>
+              <PastaFolderButton
+                pastaMeta={pastaMeta}
+                pastaCount={pastaCount}
+                selected={pasta === activePasta}
+                iconMap={iconMap}
+                sidebar={sidebarPastas}
+                onSelect={() => setActivePasta(pasta)}
+              />
+            </div>
+          )
+        })}
+      </div>
+    ) : (
     <motion.div
       className={
         sidebarPastas
@@ -244,6 +296,7 @@ export default function ProjectGallery({
         )
       })}
     </motion.div>
+    )
   ) : null
 
   return (
@@ -253,24 +306,63 @@ export default function ProjectGallery({
       {folderList}
 
       <div className={`flex min-w-0 flex-1 flex-col ${compact ? 'gap-3' : 'gap-4'}`}>
-        <motion.div
+        <div
           className={`relative overflow-hidden rounded-2xl border bg-bg-950/80 ${accentClass}`}
         >
           {!lightMotion && (
             <DrawnBorder stroke="rgba(0,255,157,0.35)" className="rounded-2xl" />
           )}
-          <motion.div
-            key={galleryKey}
-            className={`relative w-full overflow-hidden bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.04)_0%,_transparent_70%)] ${stageHeight}`}
-            initial={lightMotion ? false : drawMedia.initial}
-            animate={lightMotion ? false : drawMedia.animate}
-          >
+          {lightMotion ? (
+            <div
+              key={galleryKey}
+              className={`relative w-full overflow-hidden bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.04)_0%,_transparent_70%)] ${stageHeight}`}
+            >
+              {count > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={goPrev}
+                    className={`left-2 sm:left-3 ${navBtnClass}`}
+                    aria-label="Mídia anterior"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={goNext}
+                    className={`right-2 sm:right-3 ${navBtnClass}`}
+                    aria-label="Próxima mídia"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </>
+              )}
+              <div
+                key={mediaKey}
+                className="absolute inset-0 flex items-center justify-center px-4 py-4 sm:px-6 sm:py-5"
+              >
+                <StageMedia
+                  current={current}
+                  title={title}
+                  currentLabel={currentLabel}
+                  isVideo={isVideo}
+                  lightMotion={lightMotion}
+                />
+              </div>
+            </div>
+          ) : (
+            <motion.div
+              key={galleryKey}
+              className={`relative w-full overflow-hidden bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.04)_0%,_transparent_70%)] ${stageHeight}`}
+              initial={drawMedia.initial}
+              animate={drawMedia.animate}
+            >
             {count > 1 && (
               <>
                 <button
                   type="button"
                   onClick={goPrev}
-                  className="absolute left-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-bg-900/90 text-white/80 backdrop-blur-sm transition-colors hover:border-white/25 hover:text-white sm:left-3"
+                  className={`left-2 sm:left-3 ${navBtnClass}`}
                   aria-label="Mídia anterior"
                 >
                   <ChevronLeft size={18} />
@@ -278,7 +370,7 @@ export default function ProjectGallery({
                 <button
                   type="button"
                   onClick={goNext}
-                  className="absolute right-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-bg-900/90 text-white/80 backdrop-blur-sm transition-colors hover:border-white/25 hover:text-white sm:right-3"
+                  className={`right-2 sm:right-3 ${navBtnClass}`}
                   aria-label="Próxima mídia"
                 >
                   <ChevronRight size={18} />
@@ -293,17 +385,19 @@ export default function ProjectGallery({
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                variants={mediaSwitch}
+                variants={drawMediaSwitch}
               >
                 <StageMedia
                   current={current}
                   title={title}
                   currentLabel={currentLabel}
                   isVideo={isVideo}
+                  lightMotion={lightMotion}
                 />
               </motion.div>
             </AnimatePresence>
-          </motion.div>
+            </motion.div>
+          )}
 
           <div
             className={`flex h-12 shrink-0 items-center justify-between gap-2 border-t border-white/10 bg-bg-900/60 ${
@@ -332,7 +426,7 @@ export default function ProjectGallery({
               {isVideo ? 'Vídeo' : 'Imagem'}
             </p>
           </div>
-        </motion.div>
+        </div>
 
         <div className={compact ? 'min-h-[96px]' : THUMB_ROW}>
           {count > 1 ? (
@@ -353,6 +447,7 @@ export default function ProjectGallery({
                       index={i}
                       active={i === activeIndex}
                       onSelect={() => setActiveIndex(i)}
+                      lightMotion={lightMotion}
                     />
                   )
                   if (lightMotion) {

@@ -1,10 +1,16 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowDown, Sparkles } from 'lucide-react'
+import { useLightMotion } from '../hooks/useLightMotion'
 
 const CONTAINER = {
   hidden: {},
   show: { transition: { staggerChildren: 0.11, delayChildren: 0.35 } },
+}
+
+const CONTAINER_LIGHT = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } },
 }
 
 const ITEM = {
@@ -17,6 +23,15 @@ const ITEM = {
   },
 }
 
+const ITEM_LIGHT = {
+  hidden: { opacity: 0, y: 14 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
+  },
+}
+
 const ORBS = [
   { color: 'bg-neon-green', size: 'w-72 h-72', pos: 'top-1/4 -left-32', delay: 0 },
   { color: 'bg-neon-cyan', size: 'w-96 h-96', pos: 'top-1/3 right-0', delay: 2 },
@@ -25,6 +40,9 @@ const ORBS = [
 
 export default function Hero() {
   const [logoError, setLogoError] = useState(false)
+  const lightMotion = useLightMotion()
+  const containerVariants = lightMotion ? CONTAINER_LIGHT : CONTAINER
+  const itemVariants = lightMotion ? ITEM_LIGHT : ITEM
 
   return (
     <section
@@ -38,26 +56,39 @@ export default function Hero() {
         transition={{ duration: 1.2 }}
       />
 
-      {ORBS.map((orb, i) => (
-        <motion.div
-          key={i}
-          className={`pointer-events-none absolute rounded-full ${orb.size} ${orb.color} ${orb.pos} blur-[120px]`}
-          animate={{
-            scale: [1, 1.15, 1],
-            opacity: [0.15, 0.25, 0.15],
-          }}
-          transition={{
-            duration: 8,
-            delay: orb.delay,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-      ))}
+      {ORBS.map((orb, i) =>
+        lightMotion ? (
+          <div
+            key={i}
+            className={`pointer-events-none absolute rounded-full opacity-[0.18] ${orb.size} ${orb.color} ${orb.pos} blur-3xl`}
+            aria-hidden
+          />
+        ) : (
+          <motion.div
+            key={i}
+            className={`pointer-events-none absolute rounded-full ${orb.size} ${orb.color} ${orb.pos} blur-[120px]`}
+            animate={{
+              scale: [1, 1.15, 1],
+              opacity: [0.15, 0.25, 0.15],
+            }}
+            transition={{
+              duration: 8,
+              delay: orb.delay,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+        ),
+      )}
 
       <motion.div className="relative z-10 mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
-        <motion.div variants={CONTAINER} initial="hidden" animate="show" className="text-center">
-          <motion.div variants={ITEM} className="mb-6 flex justify-center">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="text-center"
+        >
+          <motion.div variants={itemVariants} className="mb-6 flex justify-center">
             {!logoError ? (
               <img
                 src="/mxd-logo.png"
@@ -72,39 +103,39 @@ export default function Hero() {
             )}
           </motion.div>
 
-          <motion.div variants={ITEM} className="mb-4 flex items-center justify-center gap-2">
+          <motion.div variants={itemVariants} className="mb-4 flex items-center justify-center gap-2">
             <Sparkles size={16} className="text-neon-green" />
             <span className="section-label">Disponível para projetos</span>
             <Sparkles size={16} className="text-neon-green" />
           </motion.div>
 
           <motion.h1
-            variants={ITEM}
+            variants={itemVariants}
             className="font-hero text-3xl font-normal uppercase leading-[1.15] tracking-wide sm:text-5xl lg:text-6xl"
           >
             Raul <span className="text-neon">Luz</span>
           </motion.h1>
 
           <motion.p
-            variants={ITEM}
+            variants={itemVariants}
             className="mx-auto mt-4 max-w-2xl text-lg text-white/60 sm:text-xl"
           >
             Designer Gráfico · Motion Designer · Front-End Developer
           </motion.p>
 
           <motion.p
-            variants={ITEM}
+            variants={itemVariants}
             className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-white/45 sm:text-base"
           >
             Crio experiências visuais que unem design, movimento e código, da identidade de marca
             ao pixel perfeito na tela.
           </motion.p>
 
-          <motion.div variants={ITEM} className="mt-8 flex flex-wrap items-center justify-center gap-4">
+          <motion.div variants={itemVariants} className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <motion.a
               href="#portfolio"
-              whileHover={{ scale: 1.04, boxShadow: '0 0 32px rgba(0,255,157,0.35)' }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={lightMotion ? undefined : { scale: 1.04, boxShadow: '0 0 32px rgba(0,255,157,0.35)' }}
+              whileTap={lightMotion ? undefined : { scale: 0.97 }}
               onClick={(e) => {
                 e.preventDefault()
                 document.querySelector('#portfolio')?.scrollIntoView({ behavior: 'smooth' })
@@ -115,8 +146,8 @@ export default function Hero() {
             </motion.a>
             <motion.a
               href="#orcamento"
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={lightMotion ? undefined : { scale: 1.04 }}
+              whileTap={lightMotion ? undefined : { scale: 0.97 }}
               onClick={(e) => {
                 e.preventDefault()
                 document.querySelector('#orcamento')?.scrollIntoView({ behavior: 'smooth' })
@@ -128,13 +159,15 @@ export default function Hero() {
           </motion.div>
 
           <motion.div
-            variants={ITEM}
+            variants={itemVariants}
             className="mt-12 flex flex-wrap justify-center gap-3 text-xs text-white/40"
           >
             {['Motion Design', 'Branding', 'React', 'After Effects'].map((tag) => (
               <span
                 key={tag}
-                className="rounded-full border border-white/10 bg-bg-800/50 px-3 py-1.5 backdrop-blur-sm"
+                className={`rounded-full border border-white/10 bg-bg-800/50 px-3 py-1.5 ${
+                  lightMotion ? '' : 'backdrop-blur-sm'
+                }`}
               >
                 {tag}
               </span>
@@ -155,7 +188,10 @@ export default function Hero() {
         className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/30 transition-colors hover:text-neon-green"
         aria-label="Rolar para baixo"
       >
-        <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+        <motion.div
+          animate={lightMotion ? undefined : { y: [0, 8, 0] }}
+          transition={lightMotion ? undefined : { duration: 2, repeat: Infinity }}
+        >
           <ArrowDown size={24} />
         </motion.div>
       </motion.a>

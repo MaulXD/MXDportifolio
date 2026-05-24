@@ -1,9 +1,17 @@
 import { useEffect, useRef } from 'react'
 
 /**
- * Vídeo em loop, sem controles nem barra — comportamento de GIF.
+ * Vídeo em loop, sem controles — estilo GIF.
+ * `playInView`: só reproduz quando visível (cards do portfólio no mobile).
  */
-export default function LoopVideo({ src, className = '', autoPlay = true, ...rest }) {
+export default function LoopVideo({
+  src,
+  className = '',
+  autoPlay = true,
+  preload = 'auto',
+  playInView = false,
+  ...rest
+}) {
   const ref = useRef(null)
 
   useEffect(() => {
@@ -15,6 +23,26 @@ export default function LoopVideo({ src, className = '', autoPlay = true, ...res
     el.setAttribute('controlsList', 'nodownload noplaybackrate noremoteplayback nofullscreen')
     el.setAttribute('disableRemotePlayback', '')
 
+    if (playInView) {
+      const play = () => {
+        el.play().catch(() => {})
+      }
+      const pause = () => {
+        el.pause()
+      }
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) play()
+          else pause()
+        },
+        { threshold: 0.2, rootMargin: '48px' },
+      )
+
+      observer.observe(el)
+      return () => observer.disconnect()
+    }
+
     if (!autoPlay) return
 
     const play = () => {
@@ -23,17 +51,17 @@ export default function LoopVideo({ src, className = '', autoPlay = true, ...res
     play()
     el.addEventListener('loadeddata', play)
     return () => el.removeEventListener('loadeddata', play)
-  }, [src, autoPlay])
+  }, [src, autoPlay, playInView])
 
   return (
     <video
       ref={ref}
       src={src}
-      autoPlay={autoPlay}
+      autoPlay={autoPlay && !playInView}
       loop
       muted
       playsInline
-      preload="auto"
+      preload={preload}
       controls={false}
       disablePictureInPicture
       disableRemotePlayback

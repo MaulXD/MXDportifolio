@@ -58,7 +58,14 @@ export default function GalleryMedia({
   const isVideo = current?.tipoMedia === 'Vídeo'
 
   const mediaEl = isVideo ? (
-    <LoopVideo key={current.mediaUrl} src={current.mediaUrl} className={MEDIA_CLASS} />
+    <LoopVideo
+      key={current.mediaUrl}
+      src={current.mediaUrl}
+      className={MEDIA_CLASS}
+      preload={lightMotion ? 'metadata' : 'auto'}
+      playInView={lightMotion && cardPreview}
+      autoPlay={!lightMotion || !cardPreview}
+    />
   ) : (
     <img
       key={current.mediaUrl}

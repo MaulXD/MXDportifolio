@@ -70,7 +70,7 @@ export default function ProjectModal({ project, onClose }) {
       <button
         type="button"
         aria-label="Fechar projeto"
-        className="absolute inset-0 bg-bg-950/90 sm:backdrop-blur-sm"
+        className="absolute inset-0 bg-bg-950/95 sm:bg-bg-950/90 sm:backdrop-blur-sm"
         onClick={onClose}
       />
 

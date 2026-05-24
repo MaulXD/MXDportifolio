@@ -100,6 +100,16 @@
   }
 }
 
+@media (max-width: 768px) {
+  .glass {
+    @apply bg-bg-800/90 backdrop-blur-none;
+  }
+
+  .glass-hover {
+    @apply bg-bg-800/90 backdrop-blur-none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .neon-card-stroke rect {
     animation: none;
